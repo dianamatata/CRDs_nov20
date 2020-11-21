@@ -9,9 +9,9 @@ DATADIR=/home/users/a/avalosma/scratch/0_CRD
 # My output folder for CRD 2nd part of code project
 OUT_FOLDER=/home/users/a/avalosma/scratch/1_CRD
 mkdir -p $OUT_FOLDER $OUT_FOLDER/OUT
- 
-for cell_type in 'EGAD00001002670'  'EGAD00001002672' 'EGAD00001002673' ; do
-	LI=$DATADIR/${cell_type}_merged_residuals.bed.gz # only input	
+
+for cell_type in 'neut'  'mono' 'tcell' ; do
+        LI=$DATADIR/quantif_M_hist_${cell_type}.bed.gz
 	for c in $(seq 1 22); do
 		LO=$OUT_FOLDER/$cell_type\.chr$c
                 echo "$cell_type $c"
