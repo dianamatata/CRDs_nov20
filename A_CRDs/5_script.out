@@ -1,0 +1,2 @@
+__WSBATCH_CMD_40557515 "source 5_run_mapping_CRD_gene.sh"
+__WSBATCH_SB_40557515 sbatch --open-mode=append -J 5_script.job --partition=mono-EL7 --time=10:10:00 -o 5_script.out -e 5_script.err --wrap="source 5_run_mapping_CRD_gene.sh"
