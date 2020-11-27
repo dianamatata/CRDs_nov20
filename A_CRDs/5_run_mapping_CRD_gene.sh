@@ -43,31 +43,6 @@ done
 
 
 
-<<'COMMENTS'
-# TH files copied from Guillaume, see in folder $OUTDIR/permutations_thresholds the commands to find it
-#  DATADIR0=/srv/nasac.unige.ch/funpopgen/data/unige/funpopgen/grey2/SYSCID/BLUEPRINT_DATA/CRD/THREE_CELL_TYPES/CLOMICS
-
-for data_type in  'methyl' 'hist' ; do
-        for cell_type in 'neut' 'mono' 'tcell' ; do
-                for module in 'mean' 'loom' ; do
- 
-                        RNA=$DATADIR/${rna_file[${cell_type}]}_RNA.PC$PC\.bed.gz
-                        MOD=$DATACRD/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
-	                TH=$OUTDIR/permutations_thresholds/${data_type}_${cell_type}_mean_perm_threshold.txt
- 
-                        for k in $(seq 1 $K); do
-                                OUT1=$OUTDIR/${module}/mapping_CRD_gene_nominal/${data_type}_${cell_type}_${module}_CRD_gene_chunk$k
-                                cmd1="QTLtools cis --vcf $MOD --bed $RNA --nominal $TH --chunk $k $K --out ${OUT1}.txt"
-                                eval $cmd1
-                                OUT2=$OUTDIR/${module}/inverse_mapping_CRD_gene_nominal/${data_type}_${cell_type}_${module}_inverse_CRD_gene_chunk$k
-                                cmd2="QTLtools cis --vcf $RNA --bed $MOD --nominal $TH --chunk $k $K --out ${OUT2}.txt"
-                                eval $cmd2
-                        done
-                done
-        done
-done
-
-##COMMENTS
 
 ### concatenate at the end
 mkdir -p $OUTDIR/merged
@@ -75,13 +50,13 @@ mkdir -p $OUTDIR/merged
 for data_type in  'methyl' 'hist' ; do
         for cell_type in 'neut' 'mono' 'tcell' ; do
                 for module in 'mean' 'loom' ; do
-			for condition in 'mapping_CRD_gene' 'inverse_mapping_CRD_gene' 'mapping_CRD_gene_nominal' 'inverse_mapping_CRD_gene_nominal'; do
+			for condition in 'mapping_CRD_gene' 'inverse_mapping_CRD_gene' ; do
 				name=${data_type}_${cell_type}_${module}
-                        	$OUTDIR/${module}/${condition}/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_permuts.txt.gz
+                        	cat $OUTDIR/${module}/${condition}/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_permuts.txt.gz
 			done
                 done
         done
 done
 
-COMMENTS
+# COMMENTS
 
