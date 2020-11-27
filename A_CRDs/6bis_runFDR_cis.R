@@ -17,7 +17,8 @@ cat("  * Output = [", opt_output, "]\n");
 #Read data
 cat("\nRead Input data\n");
 D = read.table(opt_input,hea=T, stringsAsFactors=FALSE,fill=TRUE)
-exon_offset = ifelse(ncol(D) == 19, 0, 2)
+exon_offset = ifelse(ncol(D) >= 19, 0, 2)
+cat ("ncol(D), exon_offset", ncol(D),exon_offset)
 if (exon_offset == 2) cat("  * Gene level correction detected\n")
 MASK=!is.na(D[,18+exon_offset])
 Dnas=D[!MASK,]
