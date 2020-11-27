@@ -171,14 +171,15 @@ CRDhist = hist(table(array_aCRD_gene$CRD_ID),breaks=c(0,1,2,3,4,100),plot=F)
 genehist = hist(table(array_aCRD_gene$phenotype_ID),breaks=c(0,1,2,3,100),plot=F)
 #barplot(c(nb_CRD_not_associated,CRDhist$counts),names=c("0","1","2","3","4","5+"),main="Number of genes associated with each CRD",cex.names=1.5,cex.axis=1.5)
 #barplot(c(nb_genes_not_associated,genehist$counts),names=c("0","1","2","3","4+"),main="Number of CRDs associated with each gene",cex.names=1.5,cex.axis=1.5)
+color_palette=c("#046C9A", "#00AFBB", "#E7B800", "#FC4E07","#972D15")
 
 ggplot(data.frame(counts = c(nb_CRD_not_associated,CRDhist$counts),Number = c("0","1","2","3","4","5+")), aes(x = Number, y = counts))+ ggtitle("Genes associated with each CRD") +
-  geom_bar(stat = "identity",fill="#E69F00") +
+  geom_bar(stat = "identity",fill="#E7B800") +
   geom_text(aes(label = sprintf("%.2f%%", counts/sum(counts) * 100)),vjust = -.5, size =6) + labs(x = "Number of associated genes",y = "CRD counts") +
   theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
 
  ggplot(data.frame(counts = c(nb_genes_not_associated,genehist$counts),Number = c("0","1","2","3","4+")), aes(x = Number, y = counts))+ ggtitle("CRDs associated with each gene") +
-    geom_bar(stat = "identity",fill="#56B4E9") +
+    geom_bar(stat = "identity",fill="#046C9A") +
     geom_text(aes(label = sprintf("%.2f%%", counts/sum(counts) * 100)),vjust = -.5, size =6) + labs(x = "Number of associated CRDs",y = "Gene counts") +
     theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
 
@@ -388,7 +389,7 @@ ggplot(notcoexpressed_table_n, aes(x = Gene, y = value,fill=CRD))+ ggtitle("Not 
 
 dev.off()
 
-
+########## Hi-C
 #HiC support by gene to gene distance
 
 gene_dist_bins = c(0,1e04,2e04,5e04,1e05,2e05,5e05,1e06,3e09)
@@ -410,6 +411,20 @@ ggplot(toplot, aes(x = dist, y = counts))+ ggtitle("_HiC support for gene pairs 
    theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20),axis.text.x = element_text(angle = 45, hjust = 1))
 
 dev.off()
+
+# without > 1Mb
+pdf(paste0(path_out,'/',name_condition,"_HiC_support_gene_pairs_with_same_CRD.pdf"))
+toplot = data.frame(counts = coexpressed_mat_hic[,1,-1],dist = c("0-10kb","10-20kb","20-50kb","50-100kb","0.1-0.2Mb","0.2-0.5Mb","0.5-1Mb",">1Mb"))
+toplot=toplot[-8,]
+toplot$dist <- factor(toplot$dist ,levels = c("0-10kb","10-20kb","20-50kb","50-100kb","0.1-0.2Mb","0.2-0.5Mb","0.5-1Mb"))
+
+ggplot(toplot, aes(x = dist, y = counts))+ ggtitle("_HiC support for gene pairs associated with CRD") +
+  geom_bar(stat = "identity",fill="#56B4E9") +
+  labs(x = "Distance between genes",y = "Fraction with HiC support (%)") +
+  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20),axis.text.x = element_text(angle = 45, hjust = 1))
+
+dev.off()
+
 
 
 #HiC support by gene to CRD distance

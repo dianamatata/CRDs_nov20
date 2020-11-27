@@ -1,4 +1,4 @@
-# Plot 3.5 and 3.4 from paper
+# Plot 3.4 from paper
 # /srv/nasac.unige.ch/funpopgen/data/unige/funpopgen/grey2/SYSCID/BLUEPRINT_DATA/CRD/THREE_CELL_TYPES/CLOMICS/CELL_TYPE_COMPARISON_GENE_CRD_ASSOCIATIONS
 path_out="/Users/dianaavalos/Programming/A_CRD_plots/figs_7_Rfile"
 name_condition="hist"
