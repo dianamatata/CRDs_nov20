@@ -25,6 +25,17 @@ PCA1, mean and LOO for all CRDs
 3_merge_CRD_quantif_files.sh
 # merge all chr per cell type and sort
 
+# 5 and 6: 
+methyl_tcell_mean_mapping_CRD_gene_nominal_permuts.txt.gz
+methyl_tcell_mean_mapping_CRD_gene_permuts.txt.gz
+so we need 5 and then 6 to get thresholds values to run 5b
+
+G folder: /srv/nasac.unige.ch/funpopgen/data/unige/funpopgen/grey2/SYSCID/BLUEPRINT_DATA/CRD/THREE_CELL_TYPES/CLOMICS/EGAD00001002670_CLOMICS_v3.0/mapping_aCRD_gene/
+
+comparing the naming with G:
+- my mean_mapping_CRD_gene_nominal_permuts.txt.gz (mean nominal) is his mapping_gene_CRD_mean_ALL.txt 
+- my mean_mapping_CRD_gene_permuts.txt.gz is his gene_CRD_mean_permutations_full.txt.gz
+
 8_get_CRD_peaks.sh
 # create .peak file
 8a_sort_peaks.sh
