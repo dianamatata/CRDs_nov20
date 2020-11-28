@@ -18,13 +18,25 @@ for data_type in  'methyl' 'hist' ; do
 					cmd="$CLOMICs trans --bed $MOD --regions $c0 $c1 --out ${OUT}.txt.gz --centromere $CTM0 $CTM1 --full"
 					echo $cmd
 					eval $cmd
-					#one cmd is around 4sec. 2*3*2*22*22*4/(60*24)=16 days 
+					#one cmd is around 5sec. 2*3*2*22*22*4/(60*24)=16 days 
 				done
 			done
 		done
 	done
 done
 
+# verification 
+cd $OUTDIR
+count=$(ls | cut -d '_' -f1-3 | uniq -c)
+count2=0
+for c0 in $(seq 1 22); do
+	for c1 in $(seq $(($c0 + 1)) 22); do
+		count2=$((count2+1))	
+	done
+done
+
+echo "$count" 
+echo "expected: $count2" # somme de 1 a n= n*(n+1)/2 with n=21, result=231
 
 #HIC_VAL=/data/unige/funpopgen/odelanea/SGX/V2/data_hic/chr$c0\_chr$c1\/MAPQG0/chr$c0\_$c1\_5kb.RAWobserved.gz
 #HIC_KR0=/data/unige/funpopgen/odelanea/SGX/V2/data_hic/chr$c0\_chr$c1\/MAPQG0/chr$c0\_5kb.KRnorm.gz
