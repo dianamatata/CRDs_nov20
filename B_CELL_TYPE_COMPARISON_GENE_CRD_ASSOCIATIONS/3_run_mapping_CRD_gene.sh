@@ -24,9 +24,6 @@ rna_file[mono]="EGAD00001002674"
 rna_file[tcell]="EGAD00001002671"
 
 
-# where is TH defined in the first version?
-TH=$DARADIR1/mapping_aCRD_gene/70_vs_72/gene_CRD_mean_permutations.thresholds.txt
-
 for data_type in  'methyl' 'hist' ; do
         for cell_type_quantifM in 'neut'  'mono' 'tcell' ; do
                 for cell_type_CRD in 'neut'  'mono' 'tcell' ; do
@@ -40,9 +37,6 @@ for data_type in  'methyl' 'hist' ; do
 	                                cmd1="QTLtools cis --vcf $MOD --bed $RNA --permute 200 --chunk $k $K --out ${OUT1}.txt"
 		                        eval $cmd1
 		
-					OUTFILE1=$OUTDIR/${module}/mapping_CRD_gene_nominal/${name}_CRD_gene_chunk$k
-					cmd_nominal1="QTLtools cis --vcf $MOD --bed $RNA --nominal $TH --chunk $k $K --out $OUTFILE1.txt"
-					# eval $cmd_nominal1
 				done
 			done
 		done
