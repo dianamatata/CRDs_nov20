@@ -12,7 +12,7 @@ for data_type in  'methyl' 'hist' ; do
 #                        	for condition in 'mapping_CRD_gene' 'inverse_mapping_CRD_gene' 'mapping_CRD_gene_nominal' 'inverse_mapping_CRD_gene_nominal'; do
 				echo $name
 				condition='mapping_CRD_gene'
-                                cat $OUTDIR/${module}/${condition}/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_permuts.txt.gz
+                                cat $OUTDIR/${module}/${condition}/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${module}_${condition}_permuts.txt.gz
 #                       	done
 			done
                 done
