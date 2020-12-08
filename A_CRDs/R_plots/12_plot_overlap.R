@@ -72,7 +72,7 @@ upset(fromExpression(expressionInput3), order.by = "freq",text.scale=1.8,main.ba
 dev.off()
 
 
-
+###################### THIS ONE IS SELECTED
 #### Method 3: Look at the shared peaks belonging to CRDs among cell types
 # take the peaks of 1 CRD, what is the % of shared in the other cell type? if more than 50% shared, the CRD is shared amon the 2 cell types
 
