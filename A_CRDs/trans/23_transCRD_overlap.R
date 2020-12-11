@@ -24,7 +24,7 @@ library(corrplot)
 compare_CRD <- function(query,reference,name,threshold=0.5){
   filename=paste0(name,"_sharedCRDs.txt")
   file.create(filename)
-  
+
   CRD_IDs = unique(query$V2)
   n_replicated = 0
   for(j in 1:length(CRD_IDs)){
@@ -49,10 +49,6 @@ compare_CRD <- function(query,reference,name,threshold=0.5){
   list(total= n_replicated,fraction=n_replicated/length(CRD_IDs))
 }
 
-query=peakset_CD19
-reference=peakset_CD4
-current_CRD="2_internal_71942"
-name="peakset_CD19_peakset_CD4"
 
 #############################################################################################
 #
@@ -61,19 +57,20 @@ name="peakset_CD19_peakset_CD4"
 #############################################################################################
 
 directory='/Users/dianaavalos/Programming/CRDs_nov20/debug/analysis_files/'
+# ideal: update with FDR=0.05 and 0.01
 # histone aCRDs
 peakset_neut = as.data.frame(fread(paste0(directory,'EGAD00001002670.ALLchr.peaksID.txt'),header=F))
 peakset_mono = as.data.frame(fread(paste0(directory,'EGAD00001002672.ALLchr.peaksID.txt'),header=F))
 peakset_tcel = as.data.frame(fread(paste0(directory,'EGAD00001002673.ALLchr.peaksID.txt'),header=F))
 
-mono_vs_neut = compare_CRD(peakset_mono,peakset_neut,paste0(directory,'mono_vs_neut'))
-mono_vs_tcel = compare_CRD(peakset_mono,peakset_tcel,paste0(directory,'mono_vs_tcel'))
+mono_vs_neut = compare_CRD(peakset_mono,peakset_neut,paste0(directory,'hist_aCRD_mono_vs_neut'))
+mono_vs_tcel = compare_CRD(peakset_mono,peakset_tcel,paste0(directory,'hist_aCRD_mono_vs_tcel'))
 
-neut_vs_mono = compare_CRD(peakset_neut,peakset_mono,paste0(directory,'neut_vs_mono'))
-neut_vs_tcel = compare_CRD(peakset_neut,peakset_tcel,paste0(directory,'neut_vs_tcel'))
+neut_vs_mono = compare_CRD(peakset_neut,peakset_mono,paste0(directory,'hist_aCRD_neut_vs_mono'))
+neut_vs_tcel = compare_CRD(peakset_neut,peakset_tcel,paste0(directory,'hist_aCRD_neut_vs_tcel'))
 
-tcel_vs_mono = compare_CRD(peakset_tcel,peakset_mono,paste0(directory,'tcel_vs_mono'))
-tcel_vs_neut = compare_CRD(peakset_tcel,peakset_neut,paste0(directory,'tcel_vs_neut'))
+tcel_vs_mono = compare_CRD(peakset_tcel,peakset_mono,paste0(directory,'hist_aCRD_tcel_vs_mono'))
+tcel_vs_neut = compare_CRD(peakset_tcel,peakset_neut,paste0(directory,'hist_aCRD_tcel_vs_neut'))
 
 #############################################################################################
 #
@@ -87,6 +84,12 @@ peakset_neut = as.data.frame(fread(paste0(directory,'EGAD00001002670.ALLchr.peak
 peakset_mono = as.data.frame(fread(paste0(directory,'EGAD00001002672.ALLchr.peaksID.txt'),header=F))
 peakset_tcel = as.data.frame(fread(paste0(directory,'EGAD00001002673.ALLchr.peaksID.txt'),header=F))
 
+
+# debug
+query=peakset_mono
+reference=peakset_neut
+name=paste0(directory,'mono_vs_neut')
+threshold=0.5
 
 ### input data
 # add sCRD and methyl CRDs
