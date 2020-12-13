@@ -59,13 +59,13 @@ compare_CRD <- function(query,reference,name,threshold=0.5){
 compute_correlation_matrix_CRD_sharing <- function(peakset_neut,peakset_mono,peakset_tcell, name, out_directory){
   
   neut_vs_mono = compare_CRD(peakset_neut,peakset_mono,paste0(out_directory,paste0(name,'_neut_vs_mono')))
-  neut_vs_tcel = compare_CRD(peakset_neut,peakset_tcell,paste0(out_directory,paste0(name,'_neut_vs_tcel')))
+  neut_vs_tcell = compare_CRD(peakset_neut,peakset_tcell,paste0(out_directory,paste0(name,'_neut_vs_tcell')))
   mono_vs_neut = compare_CRD(peakset_mono,peakset_neut,paste0(out_directory,paste0(name,'_mono_vs_neut')))
-  mono_vs_tcel = compare_CRD(peakset_mono,peakset_tcell,paste0(out_directory,paste0(name,'_mono_vs_tcel')))
-  tcel_vs_mono = compare_CRD(peakset_tcell,peakset_mono,paste0(out_directory,paste0(name,'_tcel_vs_mono')))
-  tcel_vs_neut = compare_CRD(peakset_tcell,peakset_neut,paste0(out_directory,paste0(name,'_tcel_vs_neut')))
+  mono_vs_tcell = compare_CRD(peakset_mono,peakset_tcell,paste0(out_directory,paste0(name,'_mono_vs_tcell')))
+  tcell_vs_mono = compare_CRD(peakset_tcell,peakset_mono,paste0(out_directory,paste0(name,'_tcell_vs_mono')))
+  tcell_vs_neut = compare_CRD(peakset_tcell,peakset_neut,paste0(out_directory,paste0(name,'_tcell_vs_neut')))
   
-  overlap_array_input=c(neut_vs_mono$fraction, neut_vs_tcel$fraction, mono_vs_neut$fraction, mono_vs_tcel$fraction , tcel_vs_mono$fraction, tcel_vs_neut$fraction)
+  overlap_array_input=c(neut_vs_mono$fraction, neut_vs_tcell$fraction, mono_vs_neut$fraction, mono_vs_tcell$fraction , tcell_vs_mono$fraction, tcell_vs_neut$fraction)
 }
 
 
@@ -79,16 +79,16 @@ compute_correlation_matrix_CRD_sharing <- function(peakset_neut,peakset_mono,pea
 plot_correlation_matrix_CRD_sharing <- function(overlap_array_input, name, plot_directory){
 
   neut_vs_mono=overlap_array_input[1]
-  neut_vs_tcel=overlap_array_input[2]
+  neut_vs_tcell=overlap_array_input[2]
   mono_vs_neut=overlap_array_input[3]
-  mono_vs_tcel=overlap_array_input[4]
-  tcel_vs_mono=overlap_array_input[5]
-  tcel_vs_neut=overlap_array_input[6]
+  mono_vs_tcell=overlap_array_input[4]
+  tcell_vs_mono=overlap_array_input[5]
+  tcell_vs_neut=overlap_array_input[6]
   
   pdf(paste0(plot_directory,name,"_pairwise_comparisons.pdf"))
-  M = matrix(c(1,neut_vs_mono,neut_vs_tcel,
-               mono_vs_neut,1,mono_vs_tcel,
-               tcel_vs_neut,tcel_vs_mono,1),
+  M = matrix(c(1,neut_vs_mono,neut_vs_tcell,
+               mono_vs_neut,1,mono_vs_tcell,
+               tcell_vs_neut,tcell_vs_mono,1),
              ncol=3,byrow=T)
   colnames(M) = c("Neutrophils","Monocytes","T cells")
   rownames(M) = c("Neutrophils","Monocytes","T cells")
