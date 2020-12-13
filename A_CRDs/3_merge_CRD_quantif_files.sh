@@ -9,9 +9,13 @@ for data_type in  'methyl' 'hist' ; do
 			gunzip $DATADIR/quantify/${data_type}_${cell_type}.chr*.${module}.txt.gz
 	 
 			# take the first file fully and then everything except the first line into unsorted
-			awk 'FNR>1||NR==1' $DATADIR/quantify/${data_type}_${cell_type}.chr*.${module}.txt > $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.unsorted.txt
+			awk 'FNR>1||NR==1' $DATADIR/quantify/${data_type}_${cell_type}.chr*.${module}.txt \
+			  > $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.unsorted.txt
+			
 			#sort all the lines except header, by col 1 first and then col 2 by n numerical value
-			awk 'NR == 1; NR > 1 {print $0 | "sort -V -k1,1 -k2,2n"}' $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.unsorted.txt | bgzip -c > $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
+			awk 'NR == 1; NR > 1 {print $0 | "sort -V -k1,1 -k2,2n"}' \
+			 $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.unsorted.txt \
+			 | bgzip -c > $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
 	 
 			tabix -p bed $DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
 			bgzip $DATADIR/quantify/${data_type}_${cell_type}.chr*.${module}.txt
@@ -20,4 +24,5 @@ for data_type in  'methyl' 'hist' ; do
 	done
 done
 
+for file in $DATADIR/quantify/*; do gzip "$file"; done
 
