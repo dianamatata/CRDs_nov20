@@ -30,8 +30,8 @@ done
 for data_type in  'methyl' 'hist' ; do
         for cell_type in 'neut' 'mono' 'tcell' ; do
                 for module in 'mean' 'loom' ; do
-                        LM=$DATADIR/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
-                        for c in $(seq 1 22); do
+		name=${data_type}_${cell_type}_${module}
+			for c in $(seq 1 22); do
 	                	LO=$OUT_FOLDER/chr/${name}.chr$c\.peak
         	        	LO_ALL=$OUT_FOLDER/ALL/${name}.ALLchr.peaks.txt
                 		zcat $LO\.txt.gz >> $LO_ALL
