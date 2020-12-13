@@ -13,7 +13,7 @@ mkdir -p $OUT_FOLDER $OUT_FOLDER/OUT
 for cell_type in 'neut'  'mono' 'tcell' ; do
         LI=$DATADIR/quantif_M_hist_${cell_type}.bed.gz
 	for c in $(seq 1 22); do
-		LO=$OUT_FOLDER/$cell_type\.chr$c
+		LO=$OUT_FOLDER/hist_$cell_type\.chr$c
                 echo "$cell_type $c"
 		cmd1="$CLOMICs build --bed $LI --region $c --out $LO.1.tgz --silent"
 		cmd2="$CLOMICs topo --bed $LI --tree $LO.1.tgz --chr $c --out $LO\.tree.txt.gz && rm $LO\.*.tgz"
