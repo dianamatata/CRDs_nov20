@@ -195,21 +195,3 @@ for(FDRthreshold in c(0.01,0.05)){
 }
 
 
-
-
-
-
-
-
-
-
-##### DEBUG
-FDRthreshold=0.01
-trans_crd_cell1=trans_crd_mono
-trans_crd_cell2=trans_crd_neut
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'hist_mean_mono_vs_neut_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
-# shared crd computed from 23.R
- 
-# File '/Users/dianaavalos/Programming/CRDs_nov20/debug/analysis_files/mono_CRDs_shared_with_neut.txt' has size 0. Returning a NULL data.table.
-
-
