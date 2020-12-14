@@ -10,7 +10,8 @@ gc()
 
 library(tidyverse)
 library(data.frame)
-
+library(R.utils) # count lines
+library(corrplot)
 
 #############################################################################################
 #
@@ -56,59 +57,159 @@ compute_shared_transCRD <- function(shared_crds,trans_crd_cell1,trans_crd_cell2,
 }
 
 
-#################################### Folders and Files
+#############################################################################################
+#
+# FUNCTION: PLOT
+#
+#############################################################################################
+
+# without color limit (no max at 1)
+plot_correlation_matrix_CRD_sharing_no_color_limit <- function(overlap_array_input, name, plot_directory){
+  
+  neut_vs_mono=overlap_array_input[1]
+  neut_vs_tcell=overlap_array_input[2]
+  mono_vs_neut=overlap_array_input[3]
+  mono_vs_tcell=overlap_array_input[4]
+  tcell_vs_mono=overlap_array_input[5]
+  tcell_vs_neut=overlap_array_input[6]
+  
+  pdf(paste0(plot_directory,name,"_pairwise_comparisons.pdf"))
+  M = matrix(c(1,neut_vs_mono,neut_vs_tcell,
+               mono_vs_neut,1,mono_vs_tcell,
+               tcell_vs_neut,tcell_vs_mono,1),
+             ncol=3,byrow=T)
+  colnames(M) = c("Neutrophils","Monocytes","T cells")
+  rownames(M) = c("Neutrophils","Monocytes","T cells")
+  corrplot(M, method = "number",is.corr=F,col = "black",number.cex=1.5)
+  corrplot(M,is.corr=F,p.mat = M,sig.level=-1,insig = "p-value",number.cex=1.5)
+  dev.off()
+  
+}
 
 
-path_transCRDs_signif = "/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant"
-path_shared_crds="/Users/dianaavalos/Programming/CRDs_nov20/debug/analysis_files"
+plot_correlation_matrix_CRD_sharing <- function(overlap_array_input, name, plot_directory, digits=4){
+  
+  neut_vs_mono=overlap_array_input[1]
+  neut_vs_tcell=overlap_array_input[2]
+  mono_vs_neut=overlap_array_input[3]
+  mono_vs_tcell=overlap_array_input[4]
+  tcell_vs_mono=overlap_array_input[5]
+  tcell_vs_neut=overlap_array_input[6]
+  
+  pdf(paste0(plot_directory,name,"_pairwise_comparisons.pdf"))
+  M = matrix(c(1,neut_vs_mono,neut_vs_tcell,
+               mono_vs_neut,1,mono_vs_tcell,
+               tcell_vs_neut,tcell_vs_mono,1),
+             ncol=3,byrow=T)
+  colnames(M) = c("Neutrophils","Monocytes","T cells")
+  rownames(M) = c("Neutrophils","Monocytes","T cells")
+  # corrplot(M,is.corr=F,cl.lim = c(0, 1),p.mat = M,sig.level=-1,insig = "p-value",number.cex=1.5)
+  corrplot(M, method = "number",is.corr=F,col = "black",number.cex=1.5,number.digits=digits)
+  dev.off()
 
-### loop on pairs of cells
+}
+#############################################################################################
+#
+# Folders and Files
+#
+#############################################################################################
+
+
+path_transCRDs_signif = "/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant/"
+path_shared_crds="/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/overlap/"
+path_out="/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:shared/"
+plot_directory="/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:shared/plots/"
+
+#############################################################################################
+#
+# MAIN
+#
+#############################################################################################
+cell_pairs=c(c('neut','mono'),c('neut','tcell'),c('mono','neut'),c('mono','tcell'),c('tcell','neut'),c('tcell','mono'))
+
+
+for(FDRthreshold in c(0.01,0.05)){
+  for(data_type in c('hist','methyl')){
+    for(condition in c('mean','loom')){ 
+      for (i in c(1,3,5,7,9,11)){
+        cell1=cell_pairs[i]
+        cell2=cell_pairs[i+1]
+        cat(data_type, '  ',condition, '   ',cell1, '  ', cell2 )
+        # load data
+        trans_crd_cell1=as.data.frame(data.table::fread(paste0(path_transCRDs_signif,data_type,'_', cell1,'_',condition, '_trans.significant_',FDRthreshold,'.txt'), head=FALSE, stringsAsFactors=FALSE))
+        trans_crd_cell2=as.data.frame(data.table::fread(paste0(path_transCRDs_signif,data_type,'_', cell2,'_',condition, '_trans.significant_',FDRthreshold,'.txt'), head=FALSE, stringsAsFactors=FALSE))
+        shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,data_type,'_mean_',cell1,'_vs_',cell2,'_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
+        # compute shared transCRDs
+        result=compute_shared_transCRD(shared_crds,trans_crd_cell1,trans_crd_cell2,paste0(path_out,data_type,'_',condition,'_',cell1,'_vs_',cell2,'_',FDRthreshold,'_transCRDs_shared.txt'))
+      }
+    }
+  }
+}
+
+
+
+cell_pairs[1:2]
+for (cell1 in c('neut','mono','tcell')){
+  for (cell2 in c('neut','mono','tcell')){
+    if (cell1 != cell2){
+    }}}
+#############################################################################################
+#
+# FURTHER ANALYSIS
+#
+#############################################################################################
+
+# Once that we have that we want to plot a corr matrix with the percentage of shared, and also just the numbers
+
+for(FDRthreshold in c(0.01,0.05)){
+  for(data_type in c('hist','methyl')){
+    for(condition in c('mean','loom')){ 
+      
+      ### only the number of overlaps
+      neut_vs_mono=length(readLines(paste0(path_out,data_type,'_',condition,'_','neut','_vs_','mono','_',FDRthreshold,'_transCRDs_shared.txt')))
+      neut_vs_tcell=length(readLines(paste0(path_out,data_type,'_',condition,'_','neut','_vs_','tcell','_',FDRthreshold,'_transCRDs_shared.txt')))
+      mono_vs_neut=length(readLines(paste0(path_out,data_type,'_',condition,'_','mono','_vs_','neut','_',FDRthreshold,'_transCRDs_shared.txt')))
+      mono_vs_tcell=length(readLines(paste0(path_out,data_type,'_',condition,'_','mono','_vs_','tcell','_',FDRthreshold,'_transCRDs_shared.txt')))
+      tcell_vs_mono=length(readLines(paste0(path_out,data_type,'_',condition,'_','tcell','_vs_','mono','_',FDRthreshold,'_transCRDs_shared.txt')))
+      tcell_vs_neut=length(readLines(paste0(path_out,data_type,'_',condition,'_','tcell','_vs_','neut','_',FDRthreshold,'_transCRDs_shared.txt')))
+      overlap_array_input=c(neut_vs_mono, neut_vs_tcell, mono_vs_neut, mono_vs_tcell , tcell_vs_mono, tcell_vs_neut)
+      name=paste0(data_type,'_',condition,'_',FDRthreshold)
+      cat (name,'   ', overlap_array_input)
+      plot_correlation_matrix_CRD_sharing_no_color_limit(overlap_array_input, name, plot_directory)
+      
+      ### computing ratio
+      # query_vs_ref, we want length(query). see 23R
+      # hist_neut_loo_trans.significant_0.05
+      neut_vs_mono_r=neut_vs_mono/length(readLines(paste0(path_transCRDs_signif,data_type,'_neut_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      neut_vs_tcell_r=neut_vs_tcell/length(readLines(paste0(path_transCRDs_signif,data_type,'_neut_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      mono_vs_neut_r=mono_vs_neut/length(readLines(paste0(path_transCRDs_signif,data_type,'_mono_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      mono_vs_tcell_r=mono_vs_tcell/length(readLines(paste0(path_transCRDs_signif,data_type,'_mono_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      tcell_vs_mono_r=tcell_vs_mono/length(readLines(paste0(path_transCRDs_signif,data_type,'_tcell_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      tcell_vs_neut_r=tcell_vs_neut/length(readLines(paste0(path_transCRDs_signif,data_type,'_tcell_',condition,'_trans.significant_',FDRthreshold,'.txt')))
+      overlap_array_input_r=c(neut_vs_mono_r, neut_vs_tcell_r, mono_vs_neut_r, mono_vs_tcell_r , tcell_vs_mono_r, tcell_vs_neut_r)
+      name=paste0('ratio_',data_type,'_',condition,'_',FDRthreshold)
+      cat (name,'   ', overlap_array_input_r)
+      plot_correlation_matrix_CRD_sharing(overlap_array_input_r, name, plot_directory, digits=6)
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+##### DEBUG
 FDRthreshold=0.01
-trans_crd_neut = as.data.frame(data.table::fread(paste0(path_transCRDs_signif,'/hist_neut_mean_trans.significant_',FDRthreshold,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-trans_crd_mono = as.data.frame(data.table::fread(paste0(path_transCRDs_signif,'/hist_mono_mean_trans.significant_',FDRthreshold,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-trans_crd_tcell = as.data.frame(data.table::fread(paste0(path_transCRDs_signif,'/hist_tcell_mean_trans.significant_',FDRthreshold,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-
-
-#################################### Main
-
 trans_crd_cell1=trans_crd_mono
 trans_crd_cell2=trans_crd_neut
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_cell1,'_vs_',trans_crd_cell2,'.txt'), head=FALSE, stringsAsFactors=FALSE))
+shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'hist_mean_mono_vs_neut_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
 # shared crd computed from 23.R
-
-
-# mono neut 
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_mono,'_vs_',trans_crd_neut,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_mono_neut=compute_shared_transCRD(shared_crds,trans_crd_mono,trans_crd_neut,paste0(path_shared_crds,'/mono_vs_neut_transCRDs_shared.txt'))
-
-# neut mono
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_neut,'_vs_',trans_crd_mono,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_neut_mono=compute_shared_transCRD(shared_crds,trans_crd_neut,trans_crd_mono,paste0(path_shared_crds,'/neut_vs_mono_transCRDs_shared.txt'))
-
-# neut tcell
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_neut,'_vs_',trans_crd_tcell,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_neut_tcell=compute_shared_transCRD(shared_crds,trans_crd_neut,trans_crd_tcell,paste0(path_shared_crds,'/neut_vs_tcell_transCRDs_shared.txt'))
-
-# tcell neut
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_tcell,'_vs_',trans_crd_neut,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_tcell_neut=compute_shared_transCRD(shared_crds,trans_crd_tcell,trans_crd_neut,paste0(path_shared_crds,'/tcell_vs_neut_transCRDs_shared.txt'))
-
-# mono tcell
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_mono,'_vs_',trans_crd_tcell,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_mono_tcell=compute_shared_transCRD(shared_crds,trans_crd_mono,trans_crd_tcell,paste0(path_shared_crds,'/mono_vs_tcell_transCRDs_shared.txt'))
-
-# tcell mono
-shared_crds = as.data.frame(data.table::fread(paste0(path_shared_crds,'/hist_shared_aCRDs_',trans_crd_tcell,'_vs_',trans_crd_mono,'.txt'), head=FALSE, stringsAsFactors=FALSE))
-sharedtransCRDs_tcell_mono=compute_shared_transCRD(shared_crds,trans_crd_tcell,trans_crd_mono,paste0(path_shared_crds,'/tcell_vs_mono_transCRDs_shared.txt'))
-
-
-
-
-# hist_aCRD_tcel_vs_neut_sharedCRDs.txt
-# debug
-trans_crd_cell1=trans_crd_neut
-trans_crd_cell2=trans_crd_mono
-filename=paste0(path_shared_crds,'/mono_vs_neut_transCRDs_shared.txt')
+ 
 # File '/Users/dianaavalos/Programming/CRDs_nov20/debug/analysis_files/mono_CRDs_shared_with_neut.txt' has size 0. Returning a NULL data.table.
 
 
