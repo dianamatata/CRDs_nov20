@@ -25,9 +25,16 @@ directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:si
 crd_info_dir='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/CRD_id_start_end/'
 out_dir='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant_bis/'
 
+
+#############################################################################################
+#
+# MAIN
+#
+#############################################################################################
 # methyl_neut_CRD_id.txt
 # problem so far: same value for all starts and ends unique(TRH_signif$start1) only one value
 files <- list.files(path=directory, pattern="0.0*.txt", full.names=TRUE, recursive=FALSE)
+
 
 for(cell in c('neut','mono','tcell')){
   for(data_type in c('hist','methyl')){
