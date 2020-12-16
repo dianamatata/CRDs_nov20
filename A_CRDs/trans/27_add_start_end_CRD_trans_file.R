@@ -26,7 +26,7 @@ crd_info_dir='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/CRD_id_star
 out_dir='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant_bis/'
 
 # methyl_neut_CRD_id.txt
-
+# problem so far: same value for all starts and ends unique(TRH_signif$start1) only one value
 files <- list.files(path=directory, pattern="0.0*.txt", full.names=TRUE, recursive=FALSE)
 
 for(cell in c('neut','mono','tcell')){
@@ -50,19 +50,26 @@ for(cell in c('neut','mono','tcell')){
         
         # update loop with start and stop
         
-        for (i in length(TRH_signif$idx1)){
+        for (i in 1:length(TRH_signif[,1])){
           idx_1=which(CRDinfo$id == TRH_signif[i,]$id1)
-          TRH_signif$start1=CRDinfo$start[which(CRDinfo$id == TRH_signif[i,]$id1)]
-          TRH_signif$end1=CRDinfo$end[idx_1]
+          TRH_signif$start1[i]=CRDinfo$start[idx_1]
+          TRH_signif$end1[i]=CRDinfo$end[idx_1]
           idx_2=which(CRDinfo$id == TRH_signif[i,]$id2)
-          TRH_signif$start2=CRDinfo$start[idx_2]
-          TRH_signif$end2=CRDinfo$end[idx_2]
-          write.table(TRH_signif, paste0(out_dir,name_trans_file), append = FALSE,
-                      sep = " ", dec = ".", row.names = FALSE, col.names = TRUE)
+          TRH_signif$start2[i]=CRDinfo$start[idx_2]
+          TRH_signif$end2[i]=CRDinfo$end[idx_2]
         }
+        
+        write.table(TRH_signif, paste0(out_dir,name_trans_file), append = FALSE,
+                    sep = " ", dec = ".", row.names = FALSE, col.names = TRUE)
         
       }
     }
   }
 }
+
+# debug
+name_trans_file='hist_neut_mean_trans.significant_0.01.txt' 
+name_CRD='hist_neut_CRD_id.txt'
+unique(TRH_signif$id1)
+unique(TRH_signif$start1)
 
