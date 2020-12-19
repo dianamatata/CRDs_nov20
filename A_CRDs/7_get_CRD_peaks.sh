@@ -7,12 +7,13 @@ OUT_FOLDER=/home/users/a/avalosma/scratch/8_CRD_PEAKS
 mkdir -p $OUT_FOLDER $OUT_FOLDER/chr $OUT_FOLDER/ALL
 
 # LM is only the list of CRD names, so look at 7.1 first
+# module does not apply here. aCRD or sCRD: it is still the same CRD ID that we extract
 
 for data_type in  'methyl' 'hist' ; do
         for cell_type in 'neut' 'mono' 'tcell' ; do
-                for module in 'mean' 'loom' ; do
+                for module in 'mean' ; do
 			LM=$DATADIR/CRD_names/${data_type}_${cell_type}.ALLchr.${module}.txt
-			name=${data_type}_${cell_type}_${module}
+			name=${data_type}_${cell_type}
 			for c in $(seq 1 22); do
 				LT=$DATA_TREE/${data_type}_${cell_type}.chr$c\.tree.txt.gz
 			        LO=$OUT_FOLDER/chr/${name}.chr$c\.peak
@@ -29,8 +30,8 @@ done
 # merge
 for data_type in  'methyl' 'hist' ; do
         for cell_type in 'neut' 'mono' 'tcell' ; do
-                for module in 'mean' 'loom' ; do
-		name=${data_type}_${cell_type}_${module}
+                for module in 'mean'  ; do
+		name=${data_type}_${cell_type}
 			for c in $(seq 1 22); do
 	                	LO=$OUT_FOLDER/chr/${name}.chr$c\.peak
         	        	LO_ALL=$OUT_FOLDER/ALL/${name}.ALLchr.peaks.txt
