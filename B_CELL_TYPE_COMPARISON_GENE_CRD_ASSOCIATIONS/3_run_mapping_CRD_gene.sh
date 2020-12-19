@@ -12,10 +12,7 @@ OUTDIR=$DATADIR/mapping_gene_CRDs
 
 mkdir -p $OUTDIR $OUTDIR/mean $OUTDIR/loom
 for module in 'mean' 'loom' ; do
-        mkdir -p $OUTDIR/${module}/mapping_CRD_gene \
-        # $OUTDIR/${module}/inverse_mapping_CRD_gene \
-        $OUTDIR/${module}/mapping_CRD_gene_nominal \
-        # $OUTDIR/${module}/inverse_mapping_CRD_gene_nominal
+        mkdir -p $OUTDIR/${module}/mapping_CRD_gene
 done
 
 declare -A rna_file
@@ -32,11 +29,9 @@ for data_type in  'methyl' 'hist' ; do
         			MOD=$DATADIR/quantify_ALL/${name}.ALLchr.${module}.txt.gz
         	                RNA=$DIR_RNA/${rna_file[${cell_type_quantifM}]}_RNA.PC$PC\.bed.gz
 				for k in $(seq 1 $K); do
-	                        
 				        OUT1=$OUTDIR/${module}/mapping_CRD_gene/${name}_CRD_gene_chunk$k
 	                                cmd1="QTLtools cis --vcf $MOD --bed $RNA --permute 200 --chunk $k $K --out ${OUT1}.txt"
 		                        eval $cmd1
-		
 				done
 			done
 		done

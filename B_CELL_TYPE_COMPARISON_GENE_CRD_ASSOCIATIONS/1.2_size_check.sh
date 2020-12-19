@@ -1,7 +1,7 @@
 #!/bin/bash
 
 OUT_FOLDER=/home/users/a/avalosma/scratch/6_CELL_TYPE_COMPARISON_GENE_CRD_ASSOCIATIONS/quantify
-ANALYSIS_FILE=/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/B_CELL_TYPE_COMPARISON_GENE_CRD_ASSOCIATIONS/1.1b_analysis_sample_size.txt
+ANALYSIS_FILE=/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/B_CELL_TYPE_COMPARISON_GENE_CRD_ASSOCIATIONS/1.2b_analysis_sample_size.txt
 
 
 echo '' > $ANALYSIS_FILE
