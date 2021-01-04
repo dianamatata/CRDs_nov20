@@ -8,9 +8,9 @@ OUTDIR=/home/users/a/avalosma/scratch/5_CRDgene
 mkdir -p $OUTDIR $OUTDIR/mean $OUTDIR/loom 
 for module in 'mean' 'loom' ; do
         mkdir -p $OUTDIR/${module}/mapping_CRD_gene \
-	$OUTDIR/${module}/inverse_mapping_CRD_gene \
-	$OUTDIR/${module}/mapping_CRD_gene_nominal \
-	$OUTDIR/${module}/inverse_mapping_CRD_gene_nominal
+#	$OUTDIR/${module}/inverse_mapping_CRD_gene \
+#	$OUTDIR/${module}/mapping_CRD_gene_nominal \
+#	$OUTDIR/${module}/inverse_mapping_CRD_gene_nominal
 done
 
 
@@ -33,9 +33,6 @@ for data_type in  'methyl' 'hist' ; do
                         	OUT1=$OUTDIR/${module}/mapping_CRD_gene/${data_type}_${cell_type}_${module}_CRD_gene_chunk$k
                          	cmd1="QTLtools cis --vcf $MOD --bed $RNA --permute 200 --chunk $k $K --out ${OUT1}.txt"
                               	eval $cmd1
-                       		OUT2=$OUTDIR/${module}/inverse_mapping_CRD_gene/${data_type}_${cell_type}_${module}_inverse_CRD_gene_chunk$k
-#                             	cmd2="QTLtools cis --vcf $RNA --bed $MOD --permute 200 --chunk $k $K --out ${OUT2}.txt"
-                                eval $cmd2
 			done
                 done
         done
@@ -49,7 +46,7 @@ mkdir -p $OUTDIR/merged
 
                 
 for module in 'mean' 'loom' ; do                        
-	for condition in 'mapping_CRD_gene' 'inverse_mapping_CRD_gene' ; do
+	for condition in 'mapping_CRD_gene' ; do
 		for data_type in  'methyl' 'hist' ; do
 			for cell_type in 'neut' 'mono' 'tcell' ; do
 					name=${data_type}_${cell_type}_${module}
