@@ -8,7 +8,7 @@ for data_type in  'methyl' 'hist' ; do
                 for module in 'mean' 'loom' ; do
                         for condition in 'mapping_CRD_gene' 'inverse_mapping_CRD_gene' 'mapping_CRD_gene_nominal' 'inverse_mapping_CRD_gene_nominal'; do
 				name=${data_type}_${cell_type}_${module}
-				cd $OUTDIR/${module}/${condition}
+				cd $OUTDIR/OUTDIR/mapping_CRD_gene_permut200
 				nbr_chunks=$(ls | grep $name | wc -l)
 				echo $name $condition $nbr_chunks >> $analysis_file	
                         done

@@ -5,14 +5,7 @@ DATADIR=/home/users/a/avalosma/scratch/4_CRD_residualized
 DATACRD=/home/users/a/avalosma/scratch/2_CRD
 OUTDIR=/home/users/a/avalosma/scratch/5_CRDgene
 
-mkdir -p $OUTDIR $OUTDIR/mean $OUTDIR/loom 
-for module in 'mean' 'loom' ; do
-        mkdir -p $OUTDIR/${module}/mapping_CRD_gene \
-#	$OUTDIR/${module}/inverse_mapping_CRD_gene \
-#	$OUTDIR/${module}/mapping_CRD_gene_nominal \
-#	$OUTDIR/${module}/inverse_mapping_CRD_gene_nominal
-done
-
+mkdir -p $OUTDIR $OUTDIR/mapping_CRD_gene_permut200 \
 
 declare -A rna_file 
 rna_file[neut]="EGAD00001002675"
@@ -30,7 +23,7 @@ for data_type in  'methyl' 'hist' ; do
         	        MOD=$DATACRD/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
  
                 	for k in $(seq 1 $K); do
-                        	OUT1=$OUTDIR/${module}/mapping_CRD_gene/${data_type}_${cell_type}_${module}_CRD_gene_chunk$k
+                        	OUT1=$OUTDIR/mapping_CRD_gene_permut200/${data_type}_${cell_type}_${module}_CRD_gene_chunk$k
                          	cmd1="QTLtools cis --vcf $MOD --bed $RNA --permute 200 --chunk $k $K --out ${OUT1}.txt"
                               	eval $cmd1
 			done
@@ -50,7 +43,7 @@ for module in 'mean' 'loom' ; do
 		for data_type in  'methyl' 'hist' ; do
 			for cell_type in 'neut' 'mono' 'tcell' ; do
 					name=${data_type}_${cell_type}_${module}
-					cat $OUTDIR/${module}/${condition}/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_ALL.txt.gz
+					cat $OUTDIR/mapping_CRD_gene_permut200/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_ALL.txt.gz
 				done
 			done
 		done
