@@ -1,4 +1,6 @@
 # GOAL: Plot 3.4 from paper, tissue sharing gene CRDs
+# update with other tissue sharing files
+
 
 # Clean environment
 rm(list=ls())
@@ -37,6 +39,8 @@ get_common_fraction <- function(set,refset,mindist,maxdist){
     myfraction = sum(duplicated(rbind(set.filtered,refset.filtered)))/nrow(refset.filtered)
     myfraction
 }
+
+
 
 get_fraction_c1_replicated_in_c2_binned <- function(map_cell1_vs_cell2,map_c_vs_c){
   fraction_neut_replicated_in_tcel_all = c(get_common_fraction(map_cell1_vs_cell2,map_c_vs_c,0,0),
@@ -84,6 +88,7 @@ plot_correlation_matrix_CRD_sharing <- function(Matrix, name, plot_directory){
   
 }
 
+
 #############################################################################################
 #
 # DIRECTORIES AND FILES
@@ -118,6 +123,33 @@ map73_vs_70 = read.table(paste0(directory,'73_vs_70_mapping_gene_CRD_',condition
 map73_vs_72 = read.table(paste0(directory,'73_vs_72_mapping_gene_CRD_',condition,'_ALL.txt'))
 map73_vs_73 = read.table(paste0(directory,'73_vs_73_mapping_gene_CRD_',condition,'_ALL.txt'))
 
+
+
+# load data
+# loop on other conditions
+# TODO: need my own directory with my values!!!!!!
+directory='/Users/dianaavalos/Programming/A_CRD_plots/B_CELL_TYPE_COMPARISON_GENE_CRD_ASSOCIATIONS/significants/'
+condition='mean'
+
+condition='loom'
+data_type='hist'
+data_type='methyl'
+
+
+
+name=paste0('FDR_0.05',data_type,'__',condition)
+# FDR_0.05_hist_tcell_vs_tcell_mean_mapping_CRD_gene_permuts.significant.txt
+map70_vs_70 = read.table(paste0(directory,'FDR_0.05_',data_type,'_neut_vs_neut_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map70_vs_72 = read.table(paste0(directory,'FDR_0.05_',data_type,'_neut_vs_mono_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map70_vs_73 = read.table(paste0(directory,'FDR_0.05_',data_type,'_neut_vs_tcell_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map72_vs_70 = read.table(paste0(directory,'FDR_0.05_',data_type,'_mono_vs_neut_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map72_vs_72 = read.table(paste0(directory,'FDR_0.05_',data_type,'_mono_vs_mono_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map72_vs_73 = read.table(paste0(directory,'FDR_0.05_',data_type,'_mono_vs_tcell_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map73_vs_70 = read.table(paste0(directory,'FDR_0.05_',data_type,'_tcell_vs_neut_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map73_vs_72 = read.table(paste0(directory,'FDR_0.05_',data_type,'_tcell_vs_mono_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+map73_vs_73 = read.table(paste0(directory,'FDR_0.05_',data_type,'_tcell_vs_tcell_',condition,'_mapping_CRD_gene_permuts.significant.txt'))
+
+
 colnames(map70_vs_70) = colnames(map70_vs_72) = colnames(map73_vs_73) =colnames(map70_vs_73) = colnames(map72_vs_70) = colnames(map72_vs_72) = colnames(map72_vs_73) = colnames(map73_vs_70) = colnames(map73_vs_72) =  c("gene","gene_chr","gene_start","gene_end","gene_strand","dummy","distance","CRD",
 "CRD_chr","CRD_start","CRD_end","pval","slope","rank")
 
@@ -147,6 +179,12 @@ plot_correlation_matrix_CRD_sharing(Matrix, name, plot_directory)
 
 
 
+#############################################################################################
+#
+# FORGET ABOUT: not in paper
+#
+#############################################################################################
+
 
 # bar plot of the distance between genes and CRDs associations
 
@@ -168,9 +206,3 @@ plot_fractions(fraction_tcel_replicated_in_neut_all,"T cells","neutrophils")
 fraction_tcel_replicated_in_mono_all=get_fraction_c1_replicated_in_c2_binned(map72_vs_73,map73_vs_73)
 plot_fractions(fraction_tcel_replicated_in_mono_all,"T cells","monocytes")
 
-
-
-
-
-## Fig 3.5 , check in plots paper
-# how did i find this data? >fraction_of_genes_shared_btw_tissues.py

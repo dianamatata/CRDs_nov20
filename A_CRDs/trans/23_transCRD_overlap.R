@@ -105,13 +105,14 @@ plot_correlation_matrix_CRD_sharing <- function(overlap_array_input, name, plot_
 #
 #############################################################################################
 
-
-directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/peaks/'
+setwd('/Users/dianaavalos')
+directory='Programming/A_CRD_plots/trans_files/7_CRD_peaks/peaks/'
 out_directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/overlap/'
 plot_directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/plots/'
 
+condition='mean'
 for(data_type in c('hist','methyl')){
-  name=paste0(data_type,"_mean")
+  name=paste0(data_type,"_", condition)
   
   #### MAIN
   peakset_neut = as.data.frame(fread(paste0(directory,data_type,"_neut_",condition,".ALLchr.peaks.txt"),header=F))

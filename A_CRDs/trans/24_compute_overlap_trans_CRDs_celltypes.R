@@ -178,7 +178,7 @@ for(FDRthreshold in c(0.01,0.05)){
       plot_correlation_matrix_CRD_sharing_no_color_limit(overlap_array_input, name, plot_directory)
       
       ### computing ratio
-      # query_vs_ref, we want length(query). see 23R
+      # query_vs_ref, we want length(query) as denominator. see 23R
       # hist_neut_loo_trans.significant_0.05
       neut_vs_mono_r=neut_vs_mono/length(readLines(paste0(path_transCRDs_signif,data_type,'_neut_',condition,'_trans.significant_',FDRthreshold,'.txt')))
       neut_vs_tcell_r=neut_vs_tcell/length(readLines(paste0(path_transCRDs_signif,data_type,'_neut_',condition,'_trans.significant_',FDRthreshold,'.txt')))
@@ -187,6 +187,8 @@ for(FDRthreshold in c(0.01,0.05)){
       tcell_vs_mono_r=tcell_vs_mono/length(readLines(paste0(path_transCRDs_signif,data_type,'_tcell_',condition,'_trans.significant_',FDRthreshold,'.txt')))
       tcell_vs_neut_r=tcell_vs_neut/length(readLines(paste0(path_transCRDs_signif,data_type,'_tcell_',condition,'_trans.significant_',FDRthreshold,'.txt')))
       overlap_array_input_r=c(neut_vs_mono_r, neut_vs_tcell_r, mono_vs_neut_r, mono_vs_tcell_r , tcell_vs_mono_r, tcell_vs_neut_r)
+      overlap_array_input_r_percent=overlap_array_input_r*100
+      # in the others we did fraction, do we want percent here?
       name=paste0('ratio_',data_type,'_',condition,'_',FDRthreshold)
       cat (name,'   ', overlap_array_input_r)
       plot_correlation_matrix_CRD_sharing(overlap_array_input_r, name, plot_directory, digits=6)

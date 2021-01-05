@@ -7,33 +7,141 @@
 # array_aCRD_gene files from /srv/nasac.unige.ch/funpopgen/data/unige/funpopgen/grey2/SYSCID/BLUEPRINT_DATA/CRD/THREE_CELL_TYPES/CLOMICS/EGAD00001002670_CLOMICS_v3.0/mapping_aCRD_gene/mapping_gene_CRD_mean_ALL.txt
 # corr_genes: pairwise correlation between 2 genes
 
+
+# Clean environment
+rm(list=ls())
+gc()
+
+#############################################################################################
+#
+# PACKAGES
+#
+#############################################################################################
+
 library(qvalue)
 library(ggplot2)
 library(data.table)
 library(GenomicRanges)
 library(tidyverse)
 
-# common files and paths for all variations
-path_ref='/Users/dianaavalos/Programming/reference_files'
-protein_coding_genes = scan(paste0(path_ref, "/gencode.v15.annotation.protein_coding.gene_id.txt"),what="")
-long_nc_RNA_genes = scan(paste0(path_ref, "/gencode.v15.annotation.long_noncoding_RNAs.gene_id.txt"),what="")
-PCHiC = fread(paste0(path,'/PCHiC_peak_matrix_cutoff5.tsv'))
+
+#############################################################################################
+#
+# INTEGRATION OF HIC WITH TRANS DATA by with compute_hic_validated
+#
+#############################################################################################
+
+# slightly different from the one in 26_plot_trans_analysis.R
+
+compute_hic_validated <- function(PCHiC, array_CRD_genes){
+  
+  colnames(PCHiC)[1] = "baitChr"
+  
+  baitbed <- GRanges(seqnames=PCHiC$baitChr,ranges=IRanges(start=PCHiC$baitStart, end=PCHiC$baitEnd))
+  oebed <- GRanges(seqnames=PCHiC$oeChr,ranges=IRanges(start=PCHiC$oeStart, end=PCHiC$oeEnd))
+  
+  genebed <- GRanges(seqnames=array_CRD_genes$phenotype_ID_chr,ranges=IRanges(start=array_CRD_genes$phenotype_ID_start, end=array_CRD_genes$phenotype_ID_end))
+  CRDbed <- GRanges(seqnames=array_CRD_genes$CRD_ID_chr,ranges=IRanges(start=array_CRD_genes$CRD_ID_start, end=array_CRD_genes$CRD_ID_end))
+  
+  #fwd
+  x = findOverlaps(baitbed,genebed)
+  y = findOverlaps(oebed,CRDbed)
+  tmp = rbind(as.data.frame(x),as.data.frame(y))
+  validated.fwd = tmp[which(duplicated(tmp)),]
+  
+  #bwd
+  x = findOverlaps(baitbed,CRDbed)
+  y = findOverlaps(oebed,genebed)
+  tmp = rbind(as.data.frame(x),as.data.frame(y)) 
+  validated.bwd = tmp[which(duplicated(tmp)),]
+  
+  validated = unique(rbind(validated.fwd,validated.bwd))
+  
+  validated
+}
+
+
+get_corr_genes_formated <- function(corr_genes,genelist){
+  
+  corr_genes$distance = corr_genes$V4-corr_genes$V3
+  corr_genes = corr_genes[,c(3,4,5,6,8,9)]
+  colnames(corr_genes)[1:5] = c("pos1","pos2","gene1","gene2","pval")
+  corr_genes$pval.adj = p.adjust(corr_genes$pval,method='fdr')
+  corr_genes$sameCRD = -1
+  setkeyv(corr_genes,c("gene1","gene2"))
+  
+  corr_genes = corr_genes[corr_genes$gene1 %in% genelist,]
+  corr_genes = corr_genes[corr_genes$gene2 %in% genelist,]
+  corr_genes$rowid = c(1:nrow(corr_genes))
+  corr_genes
+}
+
+
+compute_HiC_column_in_array_aCRD_gene <- function(PCHiC, array_aCRD_gene,validated,cell_type){
+  
+  array_aCRD_gene_validated = rep(0,nrow(array_aCRD_gene))
+  for(i in 1:nrow(validated)){
+    currenthic = validated$queryHits[i]
+    currentmap = validated$subjectHits[i]
+    
+    currentHiCScore_all <- c(PCHiC$Neu[currenthic], PCHiC$Mon[currenthic], PCHiC$nCD4[currenthic])
+    names(currentHiCScore_all) <- c("neut", "mono", "tcell")
+    currentHiCScore=currentHiCScore_all[[cell_type]]
+    
+    if(currentHiCScore>array_aCRD_gene_validated[currentmap]){
+      array_aCRD_gene_validated[currentmap] = currentHiCScore
+    }
+  }
+  
+  array_aCRD_gene_validated
+}
+
+
+compute_ratio_hic_array_aCRD_gene <-function(CRDmindist,CRDmaxdist,cutoff=5){
+  
+  up = sum(abs(array_aCRD_gene$distance)>=CRDmindist & abs(array_aCRD_gene$distance)<CRDmaxdist & array_aCRD_gene_validated>cutoff,na.rm=T)
+  down = sum(abs(array_aCRD_gene$distance)>=CRDmindist & abs(array_aCRD_gene$distance)<CRDmaxdist,na.rm=T)
+  up/down*100
+  
+}
+
+
+#############################################################################################
+#
+# DIRECTORIES AND FILES
+#
+#############################################################################################
+
+
+path_ref='/Users/dianaavalos/Programming/reference_files/'
+protein_coding_genes = scan(paste0(path_ref, "gencode.v15.annotation.protein_coding.gene_id.txt"),what="")
+long_nc_RNA_genes = scan(paste0(path_ref, "gencode.v15.annotation.long_noncoding_RNAs.gene_id.txt"),what="")
+PCHiC = fread('/Users/dianaavalos/Programming/THREE_CELL_TYPES__CLOMICS__EGAD00001002670_CLOMICS_v3.0__TRANS/PCHiC_peak_matrix_cutoff5.tsv')
 genelist = c(protein_coding_genes,long_nc_RNA_genes)
-path_out = '/Users/dianaavalos/Programming/A_CRD_plots/figs_7_Rfile'
 
 path_CRD='/Users/dianaavalos/Programming/A_CRD_plots/quantify_ALL'
-path_CRD_genes='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged'
 rna_file <- c('/EGAD00001002675_RNA.ALL.txt.gz', '/EGAD00001002674_RNA.ALL.txt.gz', '/EGAD00001002671_RNA.ALL.txt.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
-### old
-#cell_type = '72'
-#array_aCRD_gene_old = read.table(file_aCRD_gene_old,stringsAsFactors=F)
-#file_aCRD_gene_old = paste0(path, '/mapping_gene_CRD_mean_ALL_',cell_type,'.txt')
+path='/Users/dianaavalos/Programming/Hi-C_correlated_peaks/'
+path_out = '/Users/dianaavalos/Programming/A_CRD_plots/figs_7_Rfile'
 
-#file_aCRD_gene_permutations = paste0(path, '/gene_CRD_mean_permutations_full_',cell_type,'.txt.gz')
-#aCRD_gene_perm = read.table(file_aCRD_gene_permutations, hea=F, stringsAsFactors=F)
-# d becomes aCRD_gene_perm
+path_CRD_genes='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged'
+
+### old
+# cell_type_o = '72'
+# file_aCRD_gene_old = paste0(path, '/mapping_gene_CRD_mean_ALL_',cell_type_o,'.txt')
+# array_aCRD_gene_old = read.table(file_aCRD_gene_old,stringsAsFactors=F)
+#### array_aCRD_gene=array_aCRD_gene_old
+#
+
+# file_aCRD_gene_permutations = paste0(path, '/gene_CRD_mean_permutations_full_',cell_type_o,'.txt.gz')
+# aCRD_gene_perm_old = read.table(file_aCRD_gene_permutations, hea=F, stringsAsFactors=F)
+# d becomes aCRD_gene_perm aCRD_gene_perm=aCRD_gene_perm_old
+
+data_type='hist'
+cell_type='mono'
+condition='mean'
 
 
 ###old
@@ -43,10 +151,12 @@ conditions = list('mean', 'loom')
 for(data_type in data_types){
   for(cell_type in cell_types){
     for(condition in conditions){
+      
+      # names of files
       file_CRD=paste0(path_CRD,'/', data_type,'_',cell_type ,'.ALLchr.',condition,'.txt.gz')
       cat(file_CRD)
       file_aCRD_gene=paste0(path_CRD_genes,'/',data_type,'_',cell_type ,'_',condition,'_mapping_CRD_gene_nominal_permuts.txt.gz')
-      file_aCRD_gene_permutations=paste0(path_CRD_genes,'/',data_type,'_',cell_type ,'_',condition,'_mapping_CRD_gene_permuts.txt.gz')
+      file_aCRD_gene_permutations=paste0(path_CRD_genes,'/',data_type,'_',cell_type ,'_',condition,'_mapping_CRD_gene_ALL.txt.gz')
       name_condition=paste0(data_type,'_',cell_type ,'_',condition)
       
       # download files
@@ -56,11 +166,11 @@ for(data_type in data_types){
       corr_genes=fread(paste0(path,rna_file[[cell_type]]))
       
 
-
 ########
 
       colnames(array_aCRD_gene) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
        "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","nominal_pval","slope","top_variant")
+      
       #Filter protein coding and long nc RNA genes
       array_aCRD_gene = array_aCRD_gene[array_aCRD_gene$phenotype_ID %in% genelist,]
       array_aCRD_gene = array_aCRD_gene[order(array_aCRD_gene[,2],array_aCRD_gene[,3]),]
@@ -71,76 +181,20 @@ for(data_type in data_types){
       "Dummy","1st_param_beta","2nd_param_beta","nominal_pval","slope","empirical_pval","beta_pval")
       aCRD_gene_perm = aCRD_gene_perm[aCRD_gene_perm$phenotype_ID %in% genelist,]
       
-      corr_genes$distance = corr_genes$V4-corr_genes$V3
-      corr_genes = corr_genes[,c(3,4,5,6,8,9)]
-      colnames(corr_genes)[1:5] = c("pos1","pos2","gene1","gene2","pval")
-      corr_genes$pval.adj = p.adjust(corr_genes$pval,method='fdr')
-      corr_genes$sameCRD = -1
-      setkeyv(corr_genes,c("gene1","gene2"))
+      # test
+      # array_CRD_genes=aCRD_gene_perm
+      # validated=compute_hic_validated(PCHiC, aCRD_gene_perm)
       
-      corr_genes = corr_genes[corr_genes$gene1 %in% genelist,]
-      corr_genes = corr_genes[corr_genes$gene2 %in% genelist,]
-      corr_genes$rowid = c(1:nrow(corr_genes))
+      ##### MAIN
+      corr_genes=get_corr_genes_formated(corr_genes,genelist)
       nb_genes_not_associated = length(unique(corr_genes$gene1)) - length(unique(array_aCRD_gene$phenotype_ID))
-      colnames(PCHiC)[1] = "baitChr"
+      validated=compute_hic_validated(PCHiC, array_aCRD_gene)
       
-      baitbed <- GRanges(seqnames=PCHiC$baitChr,ranges=IRanges(start=PCHiC$baitStart, end=PCHiC$baitEnd))
-      oebed <- GRanges(seqnames=PCHiC$oeChr,ranges=IRanges(start=PCHiC$oeStart, end=PCHiC$oeEnd))
-      
-      genebed <- GRanges(seqnames=array_aCRD_gene$phenotype_ID_chr,ranges=IRanges(start=array_aCRD_gene$phenotype_ID_start, end=array_aCRD_gene$phenotype_ID_end))
-      CRDbed <- GRanges(seqnames=array_aCRD_gene$CRD_ID_chr,ranges=IRanges(start=array_aCRD_gene$CRD_ID_start, end=array_aCRD_gene$CRD_ID_end))
-      
-      #fwd
-      x = findOverlaps(baitbed,genebed)
-      y = findOverlaps(oebed,CRDbed)
-      tmp = rbind(as.data.frame(x),as.data.frame(y))
-      validated.fwd = tmp[which(duplicated(tmp)),]
-      
-      #bwd
-      x = findOverlaps(baitbed,CRDbed)
-      y = findOverlaps(oebed,genebed)
-      tmp = rbind(as.data.frame(x),as.data.frame(y)) 
-      validated.bwd = tmp[which(duplicated(tmp)),]
-      
-      validated = unique(rbind(validated.fwd,validated.bwd))
-      # 
-      # hic_validated = rep(1,nrow(PCHiC))
-      # for(i in 1:nrow(validated)){
-      #     currenthic = validated$queryHits[i]
-      #     currentpval = array_aCRD_gene$nominal_pval[validated$subjectHits[i]]
-      #     if(currentpval<hic_validated[currenthic]){ # <1
-      #         hic_validated[currenthic] = currentpval
-      #     }
-      # }
-      
-      array_aCRD_gene_validated = rep(0,nrow(array_aCRD_gene))
-      for(i in 1:nrow(validated)){
-          currenthic = validated$queryHits[i]
-          currentmap = validated$subjectHits[i]
-          if (cell_type=='70'){
-            currentHiCScore = PCHiC$Neu[currenthic] 
-          }else if (cell_type=='72'){
-            currentHiCScore = PCHiC$Mon[currenthic]
-          }else if (cell_type=='73'){
-            currentHiCScore = PCHiC$nCD4[currenthic] ##### depend on cell type so maybe redo plots with HiC?
-          }
-          if(currentHiCScore>array_aCRD_gene_validated[currentmap]){
-              array_aCRD_gene_validated[currentmap] = currentHiCScore
-          }
-      }
-      
+      array_aCRD_gene_validated=compute_HiC_column_in_array_aCRD_gene(PCHiC, array_aCRD_gene,validated,cell_type)
       array_aCRD_gene$HIC=array_aCRD_gene_validated
       
       crd_dist_bins = c(0,1,1e04,2e04,5e04,1e05,2e05,5e05,1e06)
-      
-      compute_ratio_hic_array_aCRD_gene <-function(CRDmindist,CRDmaxdist,cutoff=5){
-        up = sum(abs(array_aCRD_gene$distance)>=CRDmindist & abs(array_aCRD_gene$distance)<CRDmaxdist & array_aCRD_gene_validated>cutoff,na.rm=T)
-        down = sum(abs(array_aCRD_gene$distance)>=CRDmindist & abs(array_aCRD_gene$distance)<CRDmaxdist,na.rm=T)
-        up/down*100
-      }
-      
       mat_hic = matrix(0,nrow=(length(crd_dist_bins)-1),ncol=1)
-      
       for(i in 1:(length(crd_dist_bins)-1)){
         mat_hic[i,1] = compute_ratio_hic_array_aCRD_gene(crd_dist_bins[i],crd_dist_bins[i+1])
       }
@@ -151,6 +205,7 @@ for(data_type in data_types){
       pdf(paste0(path_out,'/',name_condition,"_3.1_Histogram_pvalue_5FRD.pdf"))
       hist(aCRD_gene_perm$beta_pval,main=paste0("Histogram of adjusted p-values%\n",nrow(array_aCRD_gene)," significant associations at 5% FDR"),xlab="P-values",cex.lab=1.3,cex.axis=1.3)
       dev.off()
+      
       
       pdf(paste0(path_out,'/',name_condition,"_3.2_Histogram_gene_CRD_distance.pdf")) # Relative positive of genes within CRDs histogram
       hist(array_aCRD_gene$distance[which(array_aCRD_gene$distance!=0)],n=101,main='Distance between genes and CRDs',xlab='Distance [bp]',cex.lab=1.3,cex.axis=1.3)
@@ -175,11 +230,13 @@ for(data_type in data_types){
       dev.off()
       
       
+      ###############################
       pdf(paste0(path_out,'/',name_condition,"_3.6_Connectivity_CRD_gene.pdf"))
       CRDhist = hist(table(array_aCRD_gene$CRD_ID),breaks=c(0,1,2,3,4,100),plot=F)
       genehist = hist(table(array_aCRD_gene$phenotype_ID),breaks=c(0,1,2,3,100),plot=F)
       #barplot(c(nb_CRD_not_associated,CRDhist$counts),names=c("0","1","2","3","4","5+"),main="Number of genes associated with each CRD",cex.names=1.5,cex.axis=1.5)
       #barplot(c(nb_genes_not_associated,genehist$counts),names=c("0","1","2","3","4+"),main="Number of CRDs associated with each gene",cex.names=1.5,cex.axis=1.5)
+      
       color_palette=c("#046C9A", "#00AFBB", "#E7B800", "#FC4E07","#972D15")
       
       ggplot(data.frame(counts = c(nb_CRD_not_associated,CRDhist$counts),Number = c("0","1","2","3","4","5+")), aes(x = Number, y = counts))+ ggtitle("Genes associated with each CRD") +
@@ -187,10 +244,10 @@ for(data_type in data_types){
         geom_text(aes(label = sprintf("%.2f%%", counts/sum(counts) * 100)),vjust = -.5, size =6) + labs(x = "Number of associated genes",y = "CRD counts") +
         theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
       
-       ggplot(data.frame(counts = c(nb_genes_not_associated,genehist$counts),Number = c("0","1","2","3","4+")), aes(x = Number, y = counts))+ ggtitle("CRDs associated with each gene") +
-          geom_bar(stat = "identity",fill="#046C9A") +
-          geom_text(aes(label = sprintf("%.2f%%", counts/sum(counts) * 100)),vjust = -.5, size =6) + labs(x = "Number of associated CRDs",y = "Gene counts") +
-          theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
+      ggplot(data.frame(counts = c(nb_genes_not_associated,genehist$counts),Number = c("0","1","2","3","4+")), aes(x = Number, y = counts))+ ggtitle("CRDs associated with each gene") +
+        geom_bar(stat = "identity",fill="#046C9A") +
+        geom_text(aes(label = sprintf("%.2f%%", counts/sum(counts) * 100)),vjust = -.5, size =6) + labs(x = "Number of associated CRDs",y = "Gene counts") +
+        theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
       
       dev.off()
       
@@ -256,7 +313,7 @@ for(data_type in data_types){
       corr_genes$dist1[tmpdf$idx] = tmpdf$mindist1
       corr_genes$dist2[tmpdf$idx] = tmpdf$mindist2
       
-      compute_ratio <-function(coexpressed=T,mindist,maxdist,CRDmindist,CRDmaxdist,pval.cutoff=0.01){
+      compute_ratio <-function(coexpressed=T,mindist,maxdist,CRDmindist,CRDmaxdist,corr_genes,pval.cutoff=0.01){
           if(coexpressed){
               up = sum(corr_genes$sameCRD>=CRDmindist & corr_genes$sameCRD<CRDmaxdist & corr_genes$pval.adj<pval.cutoff & abs(corr_genes$distance)>=mindist & abs(corr_genes$distance)<maxdist,na.rm=T)
               down = sum(corr_genes$pval.adj<pval.cutoff & abs(corr_genes$distance)>=mindist & abs(corr_genes$distance)<maxdist,na.rm=T)
@@ -268,7 +325,7 @@ for(data_type in data_types){
       }
       
       # new 
-      compute_ratio_n <-function(coexpressed=T,mindist,maxdist,CRDmindist,CRDmaxdist,pval.cutoff=0.01){
+      compute_ratio_n <-function(coexpressed=T,mindist,maxdist,CRDmindist,CRDmaxdist,corr_genes,pval.cutoff=0.01){
         if(coexpressed){
             # corr_genes$sameCRD>=CRDmindist & corr_genes$sameCRD<CRDmaxdist
             up_both = sum( corr_genes$sameCRD==0 & (corr_genes$dist1 + corr_genes$dist2 ==0) & corr_genes$pval.adj<pval.cutoff & abs(corr_genes$distance)>=mindist & abs(corr_genes$distance)<maxdist,na.rm=T)
@@ -324,11 +381,11 @@ for(data_type in data_types){
         for(k in 1:(length(crd_dist_bins)-1)){
           if (k>1){
             km=k+1
-            coexpressed_mat_n[i,km] = compute_ratio(T,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1])   
-            notcoexpressed_mat_n[i,km] = compute_ratio(F,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1])
+            coexpressed_mat_n[i,km] = compute_ratio(T,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1],corr_genes)   
+            notcoexpressed_mat_n[i,km] = compute_ratio(F,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1],corr_genes)
           } else {
-            coexpressed_mat_n[i,c(k,k+1)]=compute_ratio_n(T,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1])
-            notcoexpressed_mat_n[i,c(k,k+1)] = compute_ratio_n(F,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1])
+            coexpressed_mat_n[i,c(k,k+1)]=compute_ratio_n(T,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1],corr_genes)
+            notcoexpressed_mat_n[i,c(k,k+1)] = compute_ratio_n(F,gene_dist_bins[i],gene_dist_bins[i+1],crd_dist_bins[k],crd_dist_bins[k+1],corr_genes)
           }
         }
       }
