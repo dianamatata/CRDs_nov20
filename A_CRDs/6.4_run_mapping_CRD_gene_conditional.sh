@@ -45,8 +45,7 @@ for data_type in  'methyl' 'hist' ; do
                 for module in 'mean' 'loom' ; do
 			name=${data_type}_${cell_type}_${module}
                        	cat $OUTDIR/mapping_CRD_gene_conditional/${name}_*.txt | gzip -c > $OUTDIR/merged_TH/${name}_conditional.txt.gz
-			done
-                done
+		done
         done
 done
 

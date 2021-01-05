@@ -42,9 +42,8 @@ for module in 'mean' 'loom' ; do
 	for condition in 'mapping_CRD_gene' ; do
 		for data_type in  'methyl' 'hist' ; do
 			for cell_type in 'neut' 'mono' 'tcell' ; do
-					name=${data_type}_${cell_type}_${module}
-					cat $OUTDIR/mapping_CRD_gene_permut200/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_ALL.txt.gz
-				done
+				name=${data_type}_${cell_type}_${module}
+				cat $OUTDIR/mapping_CRD_gene_permut200/${name}_*.txt | gzip -c > $OUTDIR/merged/${name}_${condition}_ALL.txt.gz
 			done
 		done
 	done

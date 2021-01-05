@@ -12,4 +12,3 @@ for file in $DIR/*.txt.gz ; do
 done
 
 
-
