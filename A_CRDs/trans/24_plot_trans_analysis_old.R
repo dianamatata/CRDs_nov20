@@ -1,3 +1,10 @@
+### old!!!!! and not working
+
+# Clean environment
+rm(list=ls())
+gc()
+
+
 library(qvalue)
 library(ggplot2)
 library(gplots)
@@ -49,12 +56,13 @@ for(i in 1:nrow(validated)){
 
 ####* loop around files and label cell types
 
-path = "/Users/dianaavalos/Programming/A_CRD_plots/trans_files"
-file.names <- dir(path, pattern =".txt.gz")
+path = "/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant_bis/"
+file.names <- dir(path, pattern =".txt")
+
 for(i in 1:length(file.names)){
   cat(file.names[i], '  ')
   filename=file.names[i]
-  name= substr(file.names[i],1,nchar(file.names[i])-11)
+  name= substr(file.names[i],1,nchar(file.names[i])-21)
   
   if (str_detect(name, 'tcell')){
     PCHiC_cell=PCHiC_Tcl
@@ -79,10 +87,10 @@ for(i in 1:length(file.names)){
   write.table(trans_data_q001, paste0(name,"_test.significant1FDR.txt"), quote=FALSE, row.names=FALSE, col.names=TRUE)
   
   
-  ######
+  ###### 5.5 5e ?
   
-  myhist_bg = hist(PCHiC_cellu,breaks = c(0,10,20,50,100,2000),plot=F)
-  myhist_signif = hist(PCHiC_cellu[hic_validated<0.05],breaks = c(0,10,20,50,100,2000),plot=F)
+  myhist_bg = hist(PCHiC_cell,breaks = c(0,10,20,50,100,2000),plot=F)
+  myhist_signif = hist(PCHiC_cell[hic_validated<0.05],breaks = c(0,10,20,50,100,2000),plot=F)
   
   pdf(paste0(name,"_HiC_validation.pdf"),5,5)
   toplot = trans_data.frame(counts = myhist_signif$counts/myhist_bg$counts*100,Number = c("0-10","11-20","21-50","51-100",">100"))
