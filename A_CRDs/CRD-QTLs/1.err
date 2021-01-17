@@ -1,0 +1,2 @@
+slurmstepd: error: *** JOB 42323075 ON node181 CANCELLED AT 2021-01-14T12:01:11 ***
+slurmstepd: error: *** JOB 42341531 ON node244 CANCELLED AT 2021-01-14T23:54:05 DUE TO TIME LIMIT ***
