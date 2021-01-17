@@ -97,11 +97,11 @@ plot_Connectivity_ALL_CellTypes <- function(transCRD_NEU,transCRD_MON,transCRD_T
 }
 
 ## if max bigger than 500 in breaks ? try to debug
-
-hist.NEU = hist(table(c(transCRD_NEU$id1, transCRD_NEU$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
-hist.MON = hist(table(c(transCRD_MON$id1, transCRD_MON$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
-hist.TCL = hist(table(c(transCRD_TCL$id1, transCRD_TCL$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
-  
+# 
+# hist.NEU = hist(table(c(transCRD_NEU$id1, transCRD_NEU$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
+# hist.MON = hist(table(c(transCRD_MON$id1, transCRD_MON$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
+# hist.TCL = hist(table(c(transCRD_TCL$id1, transCRD_TCL$id2)), breaks=c(0,5,10,20,50,100,200,max(max(table(c(transCRD_NEU$id1, transCRD_NEU$id2))))),plot=F)
+#   
 
 #############################################################################################
 #
@@ -134,7 +134,7 @@ plot_transCRD_HiC <- function(toplot, name){
 
 compute_transCRDassociation_PCHiC <- function(PCHiC, transCRD_NEU,transCRD_MON,transCRD_TCL){
   
-  hic_validated_NEU=compute_hic_validated(PCHiC, transCRD_NEU)
+  hic_validated_NEU=compute_hic_validated(PCHiC, transCRD_NEU) # TRH_signif=transCRD_NEU
   hic_validated_MON=compute_hic_validated(PCHiC, transCRD_MON)
   hic_validated_TCL=compute_hic_validated(PCHiC, transCRD_TCL)
   
@@ -153,7 +153,28 @@ compute_transCRDassociation_PCHiC <- function(PCHiC, transCRD_NEU,transCRD_MON,t
                       TCL = myhist_signif.TCL$counts/myhist_bg.TCL$counts*100)
   toplot
 }
+  # toplot5
+  # myhist_bg.MON$counts is similar, myhist_signif.MON$counts is diff. because hic_validated_MON and hic_validated diff
+  # should have 603  49  39  22  18, 
+  # I have 526  34  28   9   5
+  
 
+
+# topoplot 5
+# Number      NEU      MON      TCL
+# 1   0-10 14.45989 13.32008 13.29442
+# 2  11-20 12.88136 14.45428 14.69534
+# 3  21-50 20.44199 15.60000 18.39623
+# 4 51-100 34.00000 29.72973 34.66667
+# 5   >100 43.24324 37.50000 30.43478
+
+# toplot
+# Number      NEU      MON      TCL
+# 1   0-10 14.01070 11.61917 12.55945
+# 2  11-20 11.52542 10.02950 13.26165
+# 3  21-50 19.33702 11.20000 16.50943
+# 4 51-100 34.00000 12.16216 34.66667
+# 5   >100 43.24324 10.41667 30.43478
 
 #############################################################################################
 #
@@ -161,7 +182,9 @@ compute_transCRDassociation_PCHiC <- function(PCHiC, transCRD_NEU,transCRD_MON,t
 #
 #############################################################################################
 
-directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant_bis/'
+directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant'
+directory2='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:significant_bis'
+
 out_dir='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_Trans:other_plots/'
 
 files <- list.files(path=directory, pattern="0.0*.txt", full.names=TRUE, recursive=FALSE)
@@ -177,12 +200,12 @@ PCHiC = fread('/Users/dianaavalos/Programming/THREE_CELL_TYPES__CLOMICS__EGAD000
 #############################################################################################
 
 Paper_colors=c("#00AFBB", "#E7B800", "#FC4E07" )
+FDR='0.05'
 
 ## plot 5c
 for(data_type in c('hist','methyl')){
   for(module in c('mean','loom')){
-    for(FDR in c('0.01','0.05')){
-      
+
       name=paste0(data_type,'_',module,'_',FDR)
       cat (name, '  ')
       
@@ -193,105 +216,44 @@ for(data_type in c('hist','methyl')){
       transCRD_NEU = as.data.frame(data.table::fread(files[grepl("neu", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
       transCRD_MON = as.data.frame(data.table::fread(files[grepl("mon", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
       transCRD_TCL = as.data.frame(data.table::fread(files[grepl("tc", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-      
-      colnames(transCRD_NEU) = colnames(transCRD_MON) = colnames(transCRD_TCL) = c("idx1","chr1","start1","end1","id1","idx2","chr2","start2","end2","id2","corr","pval","qval","midplace","midplace2")
+      #colnames(transCRD_NEU) = colnames(transCRD_MON) = colnames(transCRD_TCL) = c("idx1","chr1","start1","end1","id1","idx2","chr2","start2","end2","id2","corr","pval","qval","midplace","midplace2")
       
       a=try(plot_Connectivity_ALL_CellTypes(transCRD_NEU,transCRD_MON,transCRD_TCL, name))
-      if(class(a) == "try-error"){plot_Connectivity_ALL_CellTypes_max_table(transCRD_NEU,transCRD_MON,transCRD_TCL, name)}
-    }
+      if(class(a) == "try-error"){print('error')}
+       #plot_Connectivity_ALL_CellTypes_max_table(transCRD_NEU,transCRD_MON,transCRD_TCL, name)}
+    
   }
 }
+
+
+data_type='hist'
+module='mean'
+FDR='0.01'
 
 ## plot 5e
 for(data_type in c('hist','methyl')){
   for(module in c('mean','loom')){
-    for(FDR in c('0.01','0.05')){
-      
-      name=paste0(data_type,'_',module,'_',FDR)
-      cat (name, '  ')
-      
-      files <- intersect(list.files(path=directory, pattern=data_type, full.names=TRUE, recursive=FALSE),
-                         intersect(list.files(path=directory, pattern=module, full.names=TRUE, recursive=FALSE),
-                                   list.files(path=directory, pattern=FDR, full.names=TRUE, recursive=FALSE)))
 
-      transCRD_NEU = as.data.frame(data.table::fread(files[grepl("neu", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-      transCRD_MON = as.data.frame(data.table::fread(files[grepl("mon", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-      transCRD_TCL = as.data.frame(data.table::fread(files[grepl("tc", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-      colnames(transCRD_NEU) = colnames(transCRD_MON) = colnames(transCRD_TCL) = c("idx1","chr1","start1","end1","id1","idx2","chr2","start2","end2","id2","corr","pval","qval","midplace","midplace2")
+    name=paste0(data_type,'_',module,'_',FDR)
+    cat (name, '  ')
+    
+    files <- intersect(list.files(path=directory2, pattern=data_type, full.names=TRUE, recursive=FALSE),
+                       intersect(list.files(path=directory2, pattern=module, full.names=TRUE, recursive=FALSE),
+                                 list.files(path=directory2, pattern=FDR, full.names=TRUE, recursive=FALSE)))
 
-      # get hic_validated: relationship with CRDs and HiC # need to separate per cell type? maybe yes because compute_hic_validated looks at CRD start/end positions
-      # hic_validated=compute_hic_validated(PCHiC, TRH_signif) inside compute_transCRDassociation_PCHiC
-      toplot <-try(compute_transCRDassociation_PCHiC(PCHiC, transCRD_NEU,transCRD_MON,transCRD_TCL))
-      if(class(toplot) != "try-error")
-      {
-        ########  plot 5E
-        cat ('5E ',"\n")
-        plot_transCRD_HiC(toplot, name)
-      }
-      else {cat ('ERROR ',"\n")}
+    transCRD_NEU = as.data.frame(data.table::fread(files[grepl("neu", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
+    transCRD_MON = as.data.frame(data.table::fread(files[grepl("mon", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
+    transCRD_TCL = as.data.frame(data.table::fread(files[grepl("tce", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
 
-    }
+    # hic_validated=compute_hic_validated(PCHiC, TRH_signif) inside compute_transCRDassociation_PCHiC
+    toplot2 <-try(compute_transCRDassociation_PCHiC(PCHiC, transCRD_NEU,transCRD_MON,transCRD_TCL))
+    print(toplot2)
+    if(class(toplot) != "try-error")
+    {plot_transCRD_HiC(toplot2, name)}
+    if(class(toplot) == "try-error")
+    {print('err')}
   }
 }
 
 
 
-
-      
-#############################################################################################
-#
-# DEBUG
-#
-#############################################################################################
-# for the same results than Guillaume
-
-
-data_type="hist"
-module='mean'
-FDR='0.01'
-name=paste0(data_type,'_',module,'_',FDR)
-
-files <- intersect(list.files(path=directory, pattern=data_type, full.names=TRUE, recursive=FALSE),
-                   intersect(list.files(path=directory, pattern=module, full.names=TRUE, recursive=FALSE),
-                             list.files(path=directory, pattern=FDR, full.names=TRUE, recursive=FALSE)))
-
-transCRD_NEU = as.data.frame(data.table::fread(files[grepl("neu", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-transCRD_MON = as.data.frame(data.table::fread(files[grepl("mon", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-transCRD_TCL = as.data.frame(data.table::fread(files[grepl("tc", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-colnames(transCRD_NEU) = colnames(transCRD_MON) = colnames(transCRD_TCL) = c("idx1","chr1","start1","end1","id1","idx2","chr2","start2","end2","id2","corr","pval","qval","midplace","midplace2")
-
-TRH_signif = as.data.frame(data.table::fread(files[grepl("neu", files)==TRUE], head=TRUE, stringsAsFactors=FALSE))
-hic_validated_NEU=compute_hic_validated(PCHiC, TRH_signif)
-hic_validated_MON=compute_hic_validated(PCHiC, TRH_signif)
-hic_validated_TCL=compute_hic_validated(PCHiC, TRH_signif)
-
-myhist_bg.NEU = hist(PCHiC$Neu,breaks = c(0,10,20,50,100,2000),plot=F)
-myhist_signif.NEU = hist(PCHiC$Neu[hic_validated_NEU<0.05],breaks = c(0,10,20,50,100,2000),plot=F)
-
-myhist_bg.MON = hist(PCHiC$Mon,breaks = c(0,10,20,50,100,2000),plot=F)
-myhist_signif.MON = hist(PCHiC$Mon[hic_validated_MON<0.05],breaks = c(0,10,20,50,100,2000),plot=F)
-
-myhist_bg.TCL = hist(PCHiC$nCD4,breaks = c(0,10,20,50,100,2000),plot=F)
-myhist_signif.TCL = hist(PCHiC$nCD4[hic_validated_TCL<0.05],breaks = c(0,10,20,50,100,2000),plot=F)
-
-toplot = data.frame(Number = c("0-10","11-20","21-50","51-100",">100"),NEU = myhist_signif.NEU$counts/myhist_bg.NEU$counts*100, MON = myhist_signif.MON$counts/myhist_bg.MON$counts*100,
-                    TCL = myhist_signif.TCL$counts/myhist_bg.TCL$counts*100)
-toplot
-toplot.melted = reshape2::melt(toplot,id.vars = "Number", measure.vars = c("NEU","MON","TCL"))
-colnames(toplot.melted)[2] = "CellType"
-toplot.melted$Number = factor(toplot$Number,levels = c("0-10","11-20","21-50","51-100",">100"))
-g <- ggplot(toplot.melted, aes(x = Number, y = value,fill=CellType))+ ggtitle("") +
-  geom_bar(position="dodge", stat="identity") + labs(x = "PC HiC Score",y = "Fraction of associations (%)") +  scale_fill_manual(values=c("#00AFBB", "#E7B800", "#FC4E07" )) +
-  theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) +
-  theme(text = element_text(size=18),axis.title = element_text(size = 20),axis.text.x = element_text(size = 20, angle = 45, hjust = 1),axis.text.y = element_text(size = 20))
-print(g)
-
-
-
-
-f=files[1]
-file=basename(f)
-name=paste0(str_sub(file, 1, - 27) ,str_sub(file, 34, - 5))
-toplot0=toplot
-
-  

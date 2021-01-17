@@ -24,7 +24,7 @@ library(corrplot)
 compare_CRD <- function(query,reference,name,threshold=0.5){
   filename=paste0(name,"_sharedCRDs.txt")
   file.create(filename)
-
+  
   CRD_IDs = unique(query$V2)
   n_replicated = 0
   for(j in 1:length(CRD_IDs)){
@@ -77,7 +77,7 @@ compute_correlation_matrix_CRD_sharing <- function(peakset_neut,peakset_mono,pea
 
 
 plot_correlation_matrix_CRD_sharing <- function(overlap_array_input, name, plot_directory){
-
+  
   neut_vs_mono=overlap_array_input[1]
   neut_vs_tcell=overlap_array_input[2]
   mono_vs_neut=overlap_array_input[3]
@@ -107,7 +107,7 @@ plot_correlation_matrix_CRD_sharing <- function(overlap_array_input, name, plot_
 
 setwd('/Users/dianaavalos')
 directory='Programming/A_CRD_plots/trans_files/7_CRD_peaks/peaks/'
-out_directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/overlap/'
+out_directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/'
 plot_directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/plots/'
 
 condition='mean'
@@ -120,6 +120,6 @@ for(data_type in c('hist','methyl')){
   peakset_tcell = as.data.frame(fread(paste0(directory,data_type,"_tcell_",condition,".ALLchr.peaks.txt"),header=F))
   
   overlap_array_input=compute_correlation_matrix_CRD_sharing(peakset_neut,peakset_mono,peakset_tcell, name, out_directory)
-  plot_correlation_matrix_CRD_sharing(overlap_array_input, name, plot_directory)
-
+  # plot_correlation_matrix_CRD_sharing(overlap_array_input, name, plot_directory)
+  
 }
