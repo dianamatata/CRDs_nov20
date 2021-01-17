@@ -5,8 +5,7 @@ K=100
 VCF=/home/users/a/avalosma/scratch/10_CRD_QTLs/All_chr.BPWP10_13_12_15.vcf.gz
 DATACRD=/home/users/a/avalosma/scratch/2_CRD
 OUTDIR=/home/users/a/avalosma/scratch/10_CRD_QTLs
-mkdir -p $OUTDIR $OUTDIR/permuts_$permuts
-mkdir -p $OUTDIR/merged_$permuts
+mkdir -p $OUTDIR $OUTDIR/permuts_$permuts $OUTDIR/merged_$permuts
 
 for data_type in  'methyl' 'hist' ; do
 	for cell_type in 'neut' 'mono' 'tcell' ; do
