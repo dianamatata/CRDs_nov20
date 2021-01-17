@@ -1,5 +1,5 @@
 #!/bin/bash
-permuts=200
+permuts=1000
 K=100
 
 VCF=/home/users/a/avalosma/scratch/10_CRD_QTLs/All_chr.BPWP10_13_12_15.vcf.gz
@@ -9,15 +9,13 @@ mkdir -p $OUTDIR $OUTDIR/permuts_$permuts
 mkdir -p $OUTDIR/merged_$permuts
 
 for data_type in  'methyl' 'hist' ; do
-  for cell_type in 'neut' 'mono' 'tcell' ; do
-    for module in 'mean' 'loom' ; do
-      BED=$DATACRD/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
+	for cell_type in 'neut' 'mono' 'tcell' ; do
+		for module in 'mean' 'loom' ; do
+			BED=$DATACRD/quantify_ALL/${data_type}_${cell_type}.ALLchr.${module}.txt.gz
 			for k in $(seq 1 $K); do
-
-        OUT1=$OUTDIR/permuts_$permuts/${data_type}_${cell_type}_${module}_CRD_QTL_$k
+				OUT1=$OUTDIR/permuts_$permuts/${data_type}_${cell_type}_${module}_CRD_QTL_$k
 				cmd="QTLtools cis --vcf $VCF --bed $BED --permute $permuts  --chunk $k $K --out ${OUT1}.txt"
 				eval $cmd
-
 			done
 		done
 	done
