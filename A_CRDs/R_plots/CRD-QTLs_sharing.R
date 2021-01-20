@@ -52,6 +52,7 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
   file.create(filename)
   
   for (i in 1:length(crd_qtl_cell1_signif_shared[,1])) {
+    #for (i in seq(10)) {
       
     # find equiv CRDs in cell2 
     cell2_equivalent_crd1 = shared_crds$V2[which(shared_crds$V1 == crd_qtl_cell1_signif_shared[i,]$phenotype_ID)] # many CRDs can correspond
@@ -65,6 +66,15 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
     
     subset=sub1 %>% filter(var_ID %in%  variant) 
     subset$adj_pvalue
+    
+    # check that there is an actual real overlap between the crds !!!!
+    crd_cell1=crd_qtl_cell1_signif_shared[i,]$phenotype_ID
+    crd_cell2=cell2_equivalent_crd1
+    pos_c1=cat(crd_qtl_cell1_signif_shared[i,]$phenotype_ID_start, '  ',crd_qtl_cell1_signif_shared[i,]$phenotype_ID_end, '   \n')
+    pos_c2=cat(sub1[1,]$phenotype_ID_start,'  ',sub1[1,]$phenotype_ID_end,'   \n')
+    
+    #}
+    # save values
     
     if (length(subset[,1]) != 0){
       line=paste0(subset$adj_pvalue)
@@ -119,7 +129,7 @@ for(data_type in c('hist','methyl')){
         cat (name, '  ')
         
         #crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,'FDR_',FDRthreshold,'_',data_type,'_',cell1,'_',module, '_ALL.significant.txt'), head=FALSE, stringsAsFactors=FALSE))
-        crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell2,'_',module,'_ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
+        crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell1,'_',module,'_ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
         crd_qtl_cell2_all=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_all,data_type,'_',cell2,'_',module,'__ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
         shared_crds=as.data.frame(data.table::fread(paste0(directory,name,'_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
         
