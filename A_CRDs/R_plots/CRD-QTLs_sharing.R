@@ -52,8 +52,8 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
   file.create(filename)
   
   for (i in 1:length(crd_qtl_cell1_signif_shared[,1])) {
-    #for (i in seq(10)) {
-      
+    # cat(i,' ')
+
     # find equiv CRDs in cell2 
     cell2_equivalent_crd1 = shared_crds$V2[which(shared_crds$V1 == crd_qtl_cell1_signif_shared[i,]$phenotype_ID)] # many CRDs can correspond
     
@@ -61,28 +61,27 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
     variant = crd_qtl_cell1_signif_shared[i,]$var_ID
     
     sub1=crd_qtl_cell2_all_shared %>% filter(phenotype_ID %in%  cell2_equivalent_crd1)   
-    sub=crd_qtl_cell2_all_shared %>% filter(var_ID %in%  variant)    
-    length(sub$var_ID)
+    # sub=crd_qtl_cell2_all_shared %>% filter(var_ID %in%  variant)    
+    # length(sub$var_ID)
     
     subset=sub1 %>% filter(var_ID %in%  variant) 
-    subset$adj_pvalue
+    subset$nom_pval
     
     # check that there is an actual real overlap between the crds !!!!
-    crd_cell1=crd_qtl_cell1_signif_shared[i,]$phenotype_ID
-    crd_cell2=cell2_equivalent_crd1
-    pos_c1=cat(crd_qtl_cell1_signif_shared[i,]$phenotype_ID_start, '  ',crd_qtl_cell1_signif_shared[i,]$phenotype_ID_end, '   \n')
-    pos_c2=cat(sub1[1,]$phenotype_ID_start,'  ',sub1[1,]$phenotype_ID_end,'   \n')
-    
-    #}
+    # crd_cell1=crd_qtl_cell1_signif_shared[i,]$phenotype_ID
+    # crd_cell2=cell2_equivalent_crd1
+    # pos_c1=cat(crd_qtl_cell1_signif_shared[i,]$phenotype_ID_start, '  ',crd_qtl_cell1_signif_shared[i,]$phenotype_ID_end, '   \n')
+    # pos_c2=cat(sub1[1,]$phenotype_ID_start,'  ',sub1[1,]$phenotype_ID_end,'   \n')
+
     # save values
     
     if (length(subset[,1]) != 0){
-      line=paste0(subset$adj_pvalue)
-      cat(line)
+      line=paste0(subset$nom_pval)
+      # cat(' p ',line)
       write(line,file=filename,append=TRUE)
     }
-    
   }
+  
   result=as.data.frame(data.table::fread(filename), head=FALSE, stringsAsFactors=FALSE)
   result 
 }
@@ -145,6 +144,9 @@ for(data_type in c('hist','methyl')){
              ' crd_qtl_cell2_all_shared ', length(crd_qtl_cell2_all_shared[,1]),
              ' crd_qtl_cell2_all ', length(crd_qtl_cell2_all[,1]),
              ' shared_crds ', length(shared_crds[,1]))
+        
+        cat(' ratio shared cell1 ', length(crd_qtl_cell1_signif_shared[,1])/length(crd_qtl_cell1_signif[,1])*100,
+                                           ' ratio shared cell2 ' ,length(crd_qtl_cell2_all_shared[,1])/length(crd_qtl_cell2_all[,1])*100 )
         
         hist(crd_qtl_cell2_all_shared$nom_pval)
         length(unique(crd_qtl_cell2_all_shared$var_ID))
