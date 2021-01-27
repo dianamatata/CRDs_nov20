@@ -54,16 +54,11 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
   for (i in 1:length(crd_qtl_cell1_signif_shared[,1])) {
     # cat(i,' ')
 
-    # find equiv CRDs in cell2 
+    # find equiv CRDs in cell2 + variant
     cell2_equivalent_crd1 = shared_crds$V2[which(shared_crds$V1 == crd_qtl_cell1_signif_shared[i,]$phenotype_ID)] # many CRDs can correspond
-    
-    # extract lines in cell 2 with CRD equiv and same variant
     variant = crd_qtl_cell1_signif_shared[i,]$var_ID
-    
+    # filter
     sub1=crd_qtl_cell2_all_shared %>% filter(phenotype_ID %in%  cell2_equivalent_crd1)   
-    # sub=crd_qtl_cell2_all_shared %>% filter(var_ID %in%  variant)    
-    # length(sub$var_ID)
-    
     subset=sub1 %>% filter(var_ID %in%  variant) 
     subset$nom_pval
     
@@ -77,8 +72,8 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
     
     if (length(subset[,1]) != 0){
       line=paste0(subset$nom_pval)
-      # cat(' p ',line)
-      write(line,file=filename,append=TRUE)
+      line_bis=paste0(subset$nom_pval, ' ',subset$var_ID, ' ',subset$phenotype_ID)
+      write(line_bis,file=filename,append=TRUE)
     }
   }
   
