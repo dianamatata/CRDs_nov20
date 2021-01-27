@@ -3,10 +3,6 @@
 # we need the merged and the 5%FDR significant for each
 # shared file
 
-# Clean environment
-rm(list=ls())
-gc()
-
 #############################################################################################
 #
 # PACKAGES
@@ -66,12 +62,6 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
     subset=sub1 %>% filter(var_ID %in%  variant) 
     subset$nom_pval
     
-    # check that there is an actual real overlap between the crds !!!!
-    # crd_cell1=crd_qtl_cell1_signif_shared[i,]$phenotype_ID
-    # crd_cell2=cell2_equivalent_crd1
-    # pos_c1=cat(crd_qtl_cell1_signif_shared[i,]$phenotype_ID_start, '  ',crd_qtl_cell1_signif_shared[i,]$phenotype_ID_end, '   \n')
-    # pos_c2=cat(sub1[1,]$phenotype_ID_start,'  ',sub1[1,]$phenotype_ID_end,'   \n')
-
     # save values
     
     if (length(subset[,1]) != 0){
@@ -92,13 +82,6 @@ compute_CRD_QTL_sharing <- function(shared_crds,crd_qtl_cell1_signif_shared,crd_
 # MAIN
 #
 #############################################################################################
-
-directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/'
-out_directory='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/shared/'
-dir_CRD_QTL_all='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/merged_nominal_no_FDR/'
-
-dir_CRD_QTL_signif='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/conditional_merged/'
-
 #### for cluster
 
 directory='/home/users/a/avalosma/scratch/10_CRD_QTLs/CRD_sharing/'
@@ -114,48 +97,48 @@ module='mean'
 data_type='methyl'
 i=1
 
+args <- commandArgs(trailingOnly = TRUE)
+data_type <- args[1]
+module <- args[2]
+cell1 <- args[3]
+cell2 <- args[4]
 
-    
-    for (i in c(1,3,5,7,9,11)){
-      
-        cell1='mono'
-        cell2='tcell'
-      
-        name=paste0(data_type,'_',module,'_',cell1,'_vs_',cell2)
-        cat (name, '  ')
-        
-        #crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,'FDR_',FDRthreshold,'_',data_type,'_',cell1,'_',module, '_ALL.significant.txt'), head=FALSE, stringsAsFactors=FALSE))
-        crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell1,'_',module,'__ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
-        crd_qtl_cell2_all=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_all,data_type,'_',cell2,'_',module,'__ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
-        shared_crds=as.data.frame(data.table::fread(paste0(directory,name,'_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
-        
-        crd_qtl_cell1_signif=add_colnames_signif(crd_qtl_cell1_signif)
-        crd_qtl_cell2_all=add_colnames_all(crd_qtl_cell2_all)
-        
-        crd_qtl_cell1_signif_shared=keep_shared_CRDs(crd_qtl_cell1_signif,shared_crds$V1)
-        crd_qtl_cell2_all_shared=keep_shared_CRDs(crd_qtl_cell2_all,shared_crds$V2)
-        
-        # check sizes
-        cat( ' crd_qtl_cell1_signif_shared ', length(crd_qtl_cell1_signif_shared[,1]) ,
-             ' crd_qtl_cell1_signif ', length(crd_qtl_cell1_signif[,1]),
-             ' crd_qtl_cell2_all_shared ', length(crd_qtl_cell2_all_shared[,1]),
-             ' crd_qtl_cell2_all ', length(crd_qtl_cell2_all[,1]),
-             ' shared_crds ', length(shared_crds[,1]))
-        
-        hist(crd_qtl_cell2_all_shared$nom_pval)
-        length(unique(crd_qtl_cell2_all_shared$var_ID))
-        # compute sharing
-        res=compute_CRD_QTL_sharing(shared_crds,crd_qtl_cell1_signif_shared,crd_qtl_cell2_all_shared,out_directory, name)
-        
-        # plots
-        qobj=qvalue(res$V1)
-        pi0=qobj$pi0
-        pi1=1-pi0
-        pdf(paste0(plot_directory,"histogram_p_",name,".pdf"))
-        hist(res$V3, main=paste0(' pi0=',round(pi0,digits = 3),'  pi1=',round(pi1,digits = 3)), xlab='p values', breaks=20,cex.main=1.5,  cex.lab=1.2,cex.axis=1.2)
-        dev.off()
 
-    } 
+name=paste0(data_type,'_',module,'_',cell1,'_vs_',cell2)
+cat (name, '  ')
+
+#crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,'FDR_',FDRthreshold,'_',data_type,'_',cell1,'_',module, '_ALL.significant.txt'), head=FALSE, stringsAsFactors=FALSE))
+crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell1,'_',module,'__ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
+crd_qtl_cell2_all=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_all,data_type,'_',cell2,'_',module,'__ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
+shared_crds=as.data.frame(data.table::fread(paste0(directory,name,'_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
+
+crd_qtl_cell1_signif=add_colnames_signif(crd_qtl_cell1_signif)
+crd_qtl_cell2_all=add_colnames_all(crd_qtl_cell2_all)
+
+crd_qtl_cell1_signif_shared=keep_shared_CRDs(crd_qtl_cell1_signif,shared_crds$V1)
+crd_qtl_cell2_all_shared=keep_shared_CRDs(crd_qtl_cell2_all,shared_crds$V2)
+
+# check sizes
+cat( ' crd_qtl_cell1_signif_shared ', length(crd_qtl_cell1_signif_shared[,1]) ,
+     ' crd_qtl_cell1_signif ', length(crd_qtl_cell1_signif[,1]),
+     ' crd_qtl_cell2_all_shared ', length(crd_qtl_cell2_all_shared[,1]),
+     ' crd_qtl_cell2_all ', length(crd_qtl_cell2_all[,1]),
+     ' shared_crds ', length(shared_crds[,1]))
+
+hist(crd_qtl_cell2_all_shared$nom_pval)
+length(unique(crd_qtl_cell2_all_shared$var_ID))
+# compute sharing
+res=compute_CRD_QTL_sharing(shared_crds,crd_qtl_cell1_signif_shared,crd_qtl_cell2_all_shared,out_directory, name)
+
+# plots
+qobj=qvalue(res$V1)
+pi0=qobj$pi0
+pi1=1-pi0
+pdf(paste0(plot_directory,"histogram_p_",name,".pdf"))
+hist(res$V3, main=paste0(' pi0=',round(pi0,digits = 3),'  pi1=',round(pi1,digits = 3)), xlab='p values', breaks=20,cex.main=1.5,  cex.lab=1.2,cex.axis=1.2)
+dev.off()
+
+
 
 
 
