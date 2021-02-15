@@ -1,0 +1,6 @@
+__WSBATCH_CMD_43163840 "source 10_create_sub_files.sh"
+__WSBATCH_SB_43163840 sbatch --open-mode=append -J .job --partition=shared-cpu --time=04:00:00 --mem=1000 -o triplets1.out -e triplets1.err --wrap="source 10_create_sub_files.sh"
+__WSBATCH_CMD_43183441 "source /home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh"
+__WSBATCH_SB_43183441 sbatch --open-mode=append  -J .job --partition=shared-cpu --time=04:00:00 --mem=1000 -o triplets1.out -e triplets1.err --wrap="source /home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh"
+__WSBATCH_CMD_43184396 "source /home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh"
+__WSBATCH_SB_43184396 sbatch --open-mode=append  -J .job --partition=shared-cpu --time=04:00:00 --mem=10000 -o triplets1.out -e triplets1.err --wrap="source /home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh"

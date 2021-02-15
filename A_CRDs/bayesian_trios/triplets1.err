@@ -1,0 +1,13 @@
+/var/spool/slurmd/job43163840/slurm_script: ligne 4 : source: 10_create_sub_files.sh : fichier introuvable
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh: command substitution: ligne13: Erreur de syntaxe près du symbole inattendu « ( »
+/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh: command substitution: ligne13: `paste <(echo "$variant") <(echo "$gene") <(echo "$CRD") --delimiters '\t' )'
+slurmstepd: error: Detected 2 oom-kill event(s) in step 43183441.batch cgroup. Some of your processes may have been killed by the cgroup out-of-memory handler.
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+cat: /home/users/a/avalosma/scratch/12_TRIPLETS/significants/FDR_0.05_methyl_neut_CRD_gene_var_ALL.significant.txt: Aucun fichier ou dossier de ce type
+/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh: command substitution: ligne13: Erreur de syntaxe près du symbole inattendu « ( »
+/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh: command substitution: ligne13: `paste <(echo "$variant") <(echo "$gene") <(echo "$CRD") --delimiters ';' )'
+/home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/bayesian_trios/10_create_sub_files.sh: xrealloc : impossible d'allouer 18446744071562067968 octets (389120 octets alloués)
