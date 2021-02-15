@@ -47,7 +47,7 @@ rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed
 names(rna_file) <- c("neut", "mono", "tcell")
 
 # directories for cluster
-dir_vcf='/home/users/a/avalosma/scratch/12_TRIPLETS/vcf'
+dir_vcf='/home/users/a/avalosma/scratch/12_TRIPLETS/vcf/annotated'
 dir_crd='/home/users/a/avalosma/scratch/2_CRD/quantify_ALL'
 dir_rna='/home/users/a/avalosma/scratch/4_CRD_residualized'
 dir_triplets='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_signif'
@@ -55,10 +55,6 @@ dir_out='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_data'
 rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
-
-### debug
-data_type='hist'
-cell_type='neut'
 
 
 data_types = list('hist','methyl')
@@ -77,74 +73,78 @@ for(data_type in data_types){
     triplets=fread(paste0(dir_triplets,'/',name_condition,'_triplet.txt'),head=FALSE, stringsAsFactors=FALSE)
     colnames(triplets) = c("variant","gene","CRD")
     triplets$number <- seq.int(nrow(triplets))
+
+        
+    ## transpose
+    
+    vcf2 <- as.data.frame(t(vcf[,-1]), stringsAsFactors=F) 
+    vcf2$samples <- colnames(vcf)[-1]
+    colnames(vcf2)=vcf$ID # samples in rows, variant in column
+    vcf2$samples <- rownames(vcf2)
+    
+    
+    bed2 <- as.data.frame(t(bed[,-c(1,2,3,4,5,6)]), stringsAsFactors=F) 
+    colnames(bed2)=bed$id # gene_list in col
+    rownames(bed2)=colnames(bed) # samples in row
+    bed2$samples <- rownames(bed2)
+    
+    
+    rownames(CRD) <- CRD$id
+    CRD2 <- as.data.frame(t(CRD[,-c(1:6)]), stringsAsFactors=F) 
+    colnames(CRD2)=CRD$id # crd id in col
+    CRD2$samples <- rownames(CRD2)
+    
+    ## loop over all triplets
+    triplets_cases <- list()
+    for(r in 1:nrow(triplets)){
+      trio <- triplets[r,] 
+      t_gene  <- trio$gene
+      t_var <- trio$variant
+      t_CRD <- trio$CRD
+      t_num <- trio$number
+      
+      bed_gene <- dplyr::select(bed2,c(t_gene,"samples"))
+      head(bed_gene)
+      CRD_CRD <- dplyr::select(CRD2,c(t_CRD,"samples"))
+      head(CRD_CRD)
+      vcf_variant <- dplyr::select(vcf2,c(t_var,"samples"))
+      head(vcf_variant)
+      
+      merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
+      merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
+      
+      datafr <- na.omit(merge1)
+      triplets_cases[[r]] <- datafr
+      write.table(datafr, file = paste0(dir_out,'/',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"), row.names=F, quote=F, col.names=T,sep="\t")
+    }
   }
 }
-    
 
-## transpose
+# 
+### debug
+# data_type='hist'
+# cell_type='neut'
 
-vcf2 <- as.data.frame(t(vcf[,-1]), stringsAsFactors=F) 
-vcf2$samples <- colnames(vcf)[-1]
-colnames(vcf2)=vcf$ID # samples in rows, variant in column
-vcf2$samples <- rownames(vcf2)
-
-
-bed2 <- as.data.frame(t(bed[,-c(1,2,3,4,5,6)]), stringsAsFactors=F) 
-colnames(bed2)=bed$id # gene_list in col
-rownames(bed2)=colnames(bed) # samples in row
-bed2$samples <- rownames(bed2)
-
-
-rownames(CRD) <- CRD$id
-CRD2 <- as.data.frame(t(CRD[,-c(1:6)]), stringsAsFactors=F) 
-colnames(CRD2)=CRD$id # crd id in col
-CRD2$samples <- rownames(CRD2)
-
-
-## tryout
-trio <- triplets[1,] 
-t_gene  <- trio$gene
-t_var <- trio$variant
-t_CRD <- trio$CRD
-t_num <- trio$number
-
-# creation of trio info per sample
-bed_gene <- dplyr::select(bed2,c(t_gene,"samples"))
-head(bed_gene)
-CRD_CRD <- dplyr::select(CRD2,c(t_CRD,"samples"))
-head(CRD_CRD)
-vcf_variant <- dplyr::select(vcf2,c(t_var,"samples"))
-head(vcf_variant)
-
-merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
-merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
-
-datafr <- na.omit(merge1)
-write.table(datafr,file=paste0(dir_out,'/',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"),row.names=F, quote=F, col.names=T,sep="\t")
-
-
-## loop over all triplets
-triplets_cases <- list()
-for(r in 1:nrow(triplets)){
-  trio <- triplets[r,] 
-  t_gene  <- trio$gene
-  t_var <- trio$variant
-  t_CRD <- trio$CRD
-  t_num <- trio$number
-
-  bed_gene <- dplyr::select(bed2,c(t_gene,"samples"))
-  head(bed_gene)
-  CRD_CRD <- dplyr::select(CRD2,c(t_CRD,"samples"))
-  head(CRD_CRD)
-  vcf_variant <- dplyr::select(vcf2,c(t_var,"samples"))
-  head(vcf_variant)
-  
-  merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
-  merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
-  
-  datafr <- na.omit(merge1)
-  triplets_cases[[r]] <- datafr
-  write.table(datafr, file = paste0(dir_out,'/',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"), row.names=F, quote=F, col.names=T,sep="\t")
-}
+# ## tryout
+# trio <- triplets[1,] 
+# t_gene  <- trio$gene
+# t_var <- trio$variant
+# t_CRD <- trio$CRD
+# t_num <- trio$number
+# 
+# # creation of trio info per sample
+# bed_gene <- dplyr::select(bed2,c(t_gene,"samples"))
+# head(bed_gene)
+# CRD_CRD <- dplyr::select(CRD2,c(t_CRD,"samples"))
+# head(CRD_CRD)
+# vcf_variant <- dplyr::select(vcf2,c(t_var,"samples"))
+# head(vcf_variant)
+# 
+# merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
+# merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
+# 
+# datafr <- na.omit(merge1)
+# write.table(datafr,file=paste0(dir_out,'/',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"),row.names=F, quote=F, col.names=T,sep="\t")
+# 
 
 
