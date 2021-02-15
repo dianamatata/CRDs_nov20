@@ -47,12 +47,11 @@ rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed
 names(rna_file) <- c("neut", "mono", "tcell")
 
 # directories for cluster
-dir_vcf='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios/vcf'
-dir_crd='/Users/dianaavalos/Programming/A_CRD_plots/1_CRD'
-dir_rna='/Users/dianaavalos/Programming/Hi-C_correlated_peaks'
-dir_rna='/Users/dianaavalos/Programming/A_CRD_plots/RNA'
-dir_triplets='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios/triplets_signif'
-dir_out='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios'
+dir_vcf='/home/users/a/avalosma/scratch/12_TRIPLETS/vcf'
+dir_crd='/home/users/a/avalosma/scratch/2_CRD/quantify_ALL'
+dir_rna='/home/users/a/avalosma/scratch/4_CRD_residualized'
+dir_triplets='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_signif'
+dir_out='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_data'
 rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
