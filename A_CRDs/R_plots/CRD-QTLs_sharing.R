@@ -96,7 +96,7 @@ keep_shared_CRDs <- function(crd_qtl_cell1_signif,cell1shared){
 #############################################################################################
 
 directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/'
-out_directory='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/shared/'
+out_directory='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/shared2/'
 dir_CRD_QTL_all='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/merged_nominal_no_FDR/'
 
 dir_CRD_QTL_signif='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/conditional_merged/'
@@ -146,19 +146,55 @@ for(data_type in c('hist','methyl')){
         hist(crd_qtl_cell2_all_shared$nom_pval)
         length(unique(crd_qtl_cell2_all_shared$var_ID))
         # compute sharing
-        res=compute_CRD_QTL_sharing(shared_crds,crd_qtl_cell1_signif_shared,crd_qtl_cell2_all_shared,out_directory, name)
+        # res=compute_CRD_QTL_sharing(shared_crds,crd_qtl_cell1_signif_shared,crd_qtl_cell2_all_shared,out_directory, name)
+        filename=paste0(out_directory,name,'_pvals_if_QTL_CRD_shared.txt')
+        res=as.data.frame(data.table::fread(filename), head=FALSE, stringsAsFactors=FALSE)
+        
         
         # plots
         qobj=qvalue(res$V1)
         pi0=qobj$pi0
         pi1=1-pi0
         pdf(paste0(plot_directory,"histogram_p_",name,".pdf"))
-        hist(res$V3, main=paste0(' pi0=',round(pi0,digits = 3),'  pi1=',round(pi1,digits = 3)), xlab='p values', breaks=20,cex.main=1.5,  cex.lab=1.2,cex.axis=1.2)
+        hist(res$V1, main=paste0(' pi0=',round(pi0,digits = 3),'  pi1=',round(pi1,digits = 3)), xlab='p values', breaks=20,cex.main=1.5,  cex.lab=1.2,cex.axis=1.2)
         dev.off()
 
     } 
   }
 }
 
+
+plot_directory=out_directory
+
+for(data_type in c('hist','methyl')){
+  for(module in c('mean')){
+    for (i in c(1,3,5,7,9,11)){
+      
+      cell1=cell_pairs[i]
+      cell2=cell_pairs[i+1]
+      
+      name=paste0(data_type,'_',module,'_',cell1,'_vs_',cell2)
+      cat (name, '  ')
+      filename=paste0(out_directory,name,'_pvals_if_QTL_CRD_shared.txt')
+      res=as.data.frame(data.table::fread(filename), head=FALSE, stringsAsFactors=FALSE)
+      
+      # plots
+      qobj=qvalue(res$V1)
+      pi0=qobj$pi0
+      pi1=1-pi0
+      cat(pi1)
+      # pdf(paste0(plot_directory,"histogram_p_",name,".pdf"))
+      # hist(res$V1, main=paste0(' pi0=',round(pi0,digits = 3),'  pi1=',round(pi1,digits = 3)), xlab='p values', breaks=20,cex.main=1.5,  cex.lab=1.2,cex.axis=1.2)
+      # dev.off()
+      
+    } 
+  }
+}
+
+hist_pi1=c(0.6187467,0.6208214,0.863078,0.393727,0.7476674,0.75329)
+methyl_pi1=c(0.4442685,0.3689077,0.9116054,0.4617259,0.49741,0.4068626)
+
+median(hist_pi1)
+median(methyl_pi1)
 
 
