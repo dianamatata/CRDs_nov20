@@ -42,18 +42,18 @@ dir_crd='/Users/dianaavalos/Programming/A_CRD_plots/1_CRD'
 dir_rna='/Users/dianaavalos/Programming/Hi-C_correlated_peaks'
 dir_rna='/Users/dianaavalos/Programming/A_CRD_plots/RNA'
 dir_triplets='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios/triplets_signif'
-dir_out='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios'
+dir_out='/Users/dianaavalos/Programming/A_CRD_plots/12_bayesian_trios/triplets_data'
 rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
-# directories for cluster
-dir_vcf='/home/users/a/avalosma/scratch/12_TRIPLETS/vcf/annotated'
-dir_crd='/home/users/a/avalosma/scratch/2_CRD/quantify_ALL'
-dir_rna='/home/users/a/avalosma/scratch/4_CRD_residualized'
-dir_triplets='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_signif'
-dir_out='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_data'
-rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
-names(rna_file) <- c("neut", "mono", "tcell")
+# # directories for cluster
+# dir_vcf='/home/users/a/avalosma/scratch/12_TRIPLETS/vcf/annotated'
+# dir_crd='/home/users/a/avalosma/scratch/2_CRD/quantify_ALL'
+# dir_rna='/home/users/a/avalosma/scratch/4_CRD_residualized'
+# dir_triplets='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_signif'
+# dir_out='/home/users/a/avalosma/scratch/12_TRIPLETS/triplets_data'
+# rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bed.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
+# names(rna_file) <- c("neut", "mono", "tcell")
 
 
 
@@ -67,7 +67,9 @@ for(data_type in data_types){
     name_condition=paste0(data_type,'_',cell_type )
     cat(name_condition, '  \n')
     
-    vcf=fread(paste0(dir_vcf,'/',name_condition,'_annotated2.vcf'), head=TRUE, stringsAsFactors=FALSE)
+    vcf_filtered=fread(paste0(dir_vcf,'/',name_condition,'_annotated2.vcf'), head=TRUE, stringsAsFactors=FALSE)
+    vcf=vcf_filtered[grepl("rs",vcf_filtered$ID),]
+    
     CRD=fread(paste0(dir_crd,'/',name_condition,'.ALLchr.mean.txt.gz'), head=TRUE, stringsAsFactors=FALSE)
     bed=fread(paste0(dir_rna,rna_file[[cell_type]]))
     triplets=fread(paste0(dir_triplets,'/',name_condition,'_triplet.txt'),head=FALSE, stringsAsFactors=FALSE)
@@ -85,7 +87,7 @@ for(data_type in data_types){
     
     bed2 <- as.data.frame(t(bed[,-c(1,2,3,4,5,6)]), stringsAsFactors=F) 
     colnames(bed2)=bed$id # gene_list in col
-    rownames(bed2)=colnames(bed) # samples in row
+    rownames(bed2)=colnames(bed[,-c(1,2,3,4,5,6)]) # samples in row
     bed2$samples <- rownames(bed2)
     
     
@@ -98,27 +100,32 @@ for(data_type in data_types){
     triplets_cases <- list()
     for(r in 1:nrow(triplets)){
       trio <- triplets[r,] 
-      t_gene  <- trio$gene
       t_var <- trio$variant
+      t_gene  <- trio$gene
       t_CRD <- trio$CRD
       t_num <- trio$number
       
-      bed_gene <- dplyr::select(bed2,c(t_gene,"samples"))
-      head(bed_gene)
-      CRD_CRD <- dplyr::select(CRD2,c(t_CRD,"samples"))
-      head(CRD_CRD)
-      vcf_variant <- dplyr::select(vcf2,c(t_var,"samples"))
-      head(vcf_variant)
-      
-      merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
-      merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
-      
-      datafr <- na.omit(merge1)
-      triplets_cases[[r]] <- datafr
-      write.table(datafr, file = paste0(dir_out,'/',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"), row.names=F, quote=F, col.names=T,sep="\t")
+      if (t_var!='.' && grepl('ENSG', t_gene)){
+
+        bed_gene <- bed2[, c(t_gene, "samples")]
+        head(bed_gene)
+        CRD_CRD <-  CRD2[, c(t_CRD, "samples")]
+        head(CRD_CRD)
+        vcf_variant <-  vcf2[, c(t_var, "samples")]
+        head(vcf_variant)
+        
+        merge <- merge(bed_gene,vcf_variant,by.x="samples",by.y="samples",all.x=TRUE)
+        merge1 <- merge(merge,CRD_CRD,by.x="samples",by.y="samples",all.x=TRUE)
+        
+        datafr <- na.omit(merge1)
+        triplets_cases[[r]] <- datafr
+        write.table(datafr, file = paste0(dir_out,'/',name_condition,'_',t_num,'_',t_var,'_',t_gene,'_',t_CRD, ".txt"), row.names=F, quote=F, col.names=T,sep="\t")
+        
+      }
     }
   }
 }
+
 
 # 
 ### debug
