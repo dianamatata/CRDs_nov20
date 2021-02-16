@@ -113,7 +113,7 @@ crd_qtl_cell2_all=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_all,data_ty
 shared_crds=as.data.frame(data.table::fread(paste0(directory,name,'_sharedCRDs.txt'), head=FALSE, stringsAsFactors=FALSE))
 
 crd_qtl_cell1_signif=add_colnames_signif(crd_qtl_cell1_signif)
-crd_qtl_cell2_all=add_colnames_all(crd_qtl_cell2_all)
+crd_qtl_cell2_all=add_colnames_all(crd_qtl_cell2_all) 
 
 crd_qtl_cell1_signif_shared=keep_shared_CRDs(crd_qtl_cell1_signif,shared_crds$V1)
 crd_qtl_cell2_all_shared=keep_shared_CRDs(crd_qtl_cell2_all,shared_crds$V2)

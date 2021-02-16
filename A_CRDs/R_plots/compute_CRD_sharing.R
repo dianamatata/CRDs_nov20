@@ -21,10 +21,13 @@ library(corrplot)
 # if 50% of the peak overlap, it is a shared CRD
 # save the CRDs that are shared
 
+# query=peakset_neut
+# reference=peakset_mono
+# name=paste0(out_directory,paste0(name,'_neut_vs_mono'))
 compare_CRD <- function(query,reference,name,threshold=0.5){
-  filename=paste0(name,"_sharedCRDs.txt")
+  filename=paste0(name,"_sharedCRDs1.txt")
   file.create(filename)
-  
+
   CRD_IDs = unique(query$V2)
   n_replicated = 0
   for(j in 1:length(CRD_IDs)){
@@ -42,7 +45,7 @@ compare_CRD <- function(query,reference,name,threshold=0.5){
       for (associated in associated_CRDs){
         line=paste(current_CRD ,associated,sep=" ")
         #cat(current_CRD, associated,sep="\t")
-        write(line,file=paste0(name,"_sharedCRDs.txt"),append=TRUE)
+        write(line,file=filename,append=TRUE)
       }
     }
   }
@@ -111,6 +114,7 @@ out_directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/'
 plot_directory='/Users/dianaavalos/Programming/A_CRD_plots/trans_files/7_CRD_peaks/plots/'
 
 condition='mean'
+data_type='hist'
 for(data_type in c('hist','methyl')){
   name=paste0(data_type,"_", condition)
   
@@ -123,3 +127,45 @@ for(data_type in c('hist','methyl')){
   # plot_correlation_matrix_CRD_sharing(overlap_array_input, name, plot_directory)
   
 }
+
+#############################################################################################
+#
+# check up these are actually shared
+#
+#############################################################################################
+
+
+dir_CRD_QTL_signif='/Users/dianaavalos/Programming/A_CRD_plots/10_CRD_QTL/conditional_merged/'
+
+file="/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/hist_mean_neut_vs_mono_sharedCRDs.txt"
+shared_file=as.data.frame(fread(file),head=FALSE)
+data_type='hist'
+cell1='neut'
+cell2='mono'
+module='mean'
+crd_qtl_cell1_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell1,'_',module,'_ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
+crd_qtl_cell2_signif=as.data.frame(data.table::fread(paste0(dir_CRD_QTL_signif,data_type,'_',cell2,'_',module,'_ALL.txt.gz'), head=FALSE, stringsAsFactors=FALSE))
+
+colnames(crd_qtl_cell1_signif) =colnames(crd_qtl_cell2_signif) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
+                                   "nb_variants","distance","var_ID","var_ID_chr","var_ID_start","var_ID_end","rank",
+                                   "fwd_pval","fwd_r_squared","fwd_slope","fwd_best_hit","fwd_sig","bwd_pval","bwd_r_squared","bwd_slope","bwd_best_hit","bwd_sig")
+
+head(crd_qtl_cell1_signif)
+
+
+for (i in seq(100))
+{
+
+  crd1_cell1=shared_file[i,1]
+  crd1_cell2=shared_file[i,2]
+  # cat(crd1_cell1, ' ',crd1_cell2)
+  
+  sub1=crd_qtl_cell1_signif %>% filter(phenotype_ID %in%  crd1_cell1)   
+  # cat(sub1[1,]$phenotype_ID, ' ', sub1[1,]$phenotype_ID_start, '  ', sub1[1,]$phenotype_ID_end)
+  sub2=crd_qtl_cell2_signif %>% filter(phenotype_ID %in%  crd1_cell2)   
+  # cat(sub2[1,]$phenotype_ID, ' ', sub2[1,]$phenotype_ID_start, '  ', sub2[1,]$phenotype_ID_end)
+  
+  dist=sub2[1,]$phenotype_ID_start-sub1[1,]$phenotype_ID_start
+  cat(dist, '  ')
+}
+
