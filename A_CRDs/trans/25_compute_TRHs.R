@@ -125,7 +125,9 @@ for (f in files){
   name=paste0(str_sub(file, 1, - 27) ,str_sub(file, 34, - 5))
   cat (' ',name, '  ', nbr_TRHs, '  ')
   
-  plot_50_biggest_TRH_sizes(communities,file, name)
+  # plot_50_biggest_TRH_sizes(communities,file, name)
+
+  write.table(file=paste0(out_dir,'TRH_',file),COM,quote=F,row.names=F,sep='\t')
 }
 
 

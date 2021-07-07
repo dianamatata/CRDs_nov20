@@ -12,4 +12,9 @@ wsbatch -J qtl1000.job --partition=shared-bigmem-EL7 --time=12:00:00 -o OUT/1p10
 
 
 cmd="source /home/users/a/avalosma/IMMUNE_CELLS/diana_scripts/A_CRDs/CRD-QTLs/1_run_nominal_pass_no_FDR.sh"
-wsbatch -J qtl_nom_noFDR.job --partition=shared-bigmem-EL7 --time=12:00:00 -o OUT/qtl_nom_noFDR.job.out -e OUT/qtl_nom_noFDR.job.err --wrap="$cmd"
+wsbatch -J qtl_nom_noFDR.job --partition=shared-bigmem --time=12:00:00 -o OUT/qtl_nom_noFDR.job.out -e OUT/qtl_nom_noFDR.job.err --wrap="$cmd"
+
+
+
+
+wsbatch -J 10.job --partition=shared-bigmem --time=12:00:00 -o 10.out -e 10.err --wrap="$cmd"

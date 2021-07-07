@@ -70,9 +70,11 @@ for(data_type in data_types){
     vcf_filtered=fread(paste0(dir_vcf,'/',name_condition,'_annotated2.vcf'), head=TRUE, stringsAsFactors=FALSE)
     vcf=vcf_filtered[grepl("rs",vcf_filtered$ID),]
     
-    CRD=fread(paste0(dir_crd,'/',name_condition,'.ALLchr.mean.txt.gz'), head=TRUE, stringsAsFactors=FALSE)
+    CRD=fread(paste0(dir_crd,'/',name_condition,'.ALLchr.mean.txt.gz'),
+              head=TRUE, stringsAsFactors=FALSE)
     bed=fread(paste0(dir_rna,rna_file[[cell_type]]))
-    triplets=fread(paste0(dir_triplets,'/',name_condition,'_triplet.txt'),head=FALSE, stringsAsFactors=FALSE)
+    triplets=fread(paste0(dir_triplets,'/',name_condition,'_triplet.txt'),
+                   head=FALSE, stringsAsFactors=FALSE)
     colnames(triplets) = c("variant","gene","CRD")
     triplets$number <- seq.int(nrow(triplets))
 

@@ -53,13 +53,13 @@ genelist = c(protein_coding_genes,long_nc_RNA_genes)
 
 # paths 
 
-path='/Users/dianaavalos/Programming/Hi-C_correlated_peaks/'
+path='/Users/dianaavalos/Programming/A_CRD_plots/RNA'
 path_out = '/Users/dianaavalos/Programming/A_CRD_plots/figs_geneCRD/'
 path_CRD_genes='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged_TH/'
 
 
 path_CRD='/Users/dianaavalos/Programming/A_CRD_plots/quantify_ALL/'
-rna_file <- c('/EGAD00001002675_RNA.ALL.txt.gz', '/EGAD00001002674_RNA.ALL.txt.gz', '/EGAD00001002671_RNA.ALL.txt.gz')
+rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bedt.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
 color_palette=c("#046C9A", "#00AFBB", "#E7B800", "#FC4E07","#972D15")
@@ -67,12 +67,32 @@ color_palette=c("#046C9A", "#00AFBB", "#E7B800", "#FC4E07","#972D15")
 
 data_type='hist'
 cell_type='tcell'
-condition='loom'
+condition='mean'
 FDR='0.05'
 
 data_types = list('hist','methyl')
 cell_types = list('neut','mono','tcell')
 conditions = list('mean', 'loom')
+
+
+condition='mean'
+
+for(data_type in data_types){
+  for(cell_type in cell_types){
+      name_condition=paste0(data_type,'_',cell_type ,'_',condition)
+      print(name_condition)
+      file_mapdata=paste0(path_CRD_genes,data_type,'_',cell_type ,'_',condition,'_conditional.txt.gz')
+      mapdata = read.table(file_mapdata, hea=F, stringsAsFactors=F)
+      
+      colnames(mapdata) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
+                            "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","rank",
+                            "fwd_pval","fwd_r_squared","fwd_slope","fwd_best_hit","fwd_sig","bwd_pval","bwd_r_squared","bwd_slope","bwd_best_hit","bwd_sig")
+      
+      pdf(paste0(path_out,'/',name_condition,"_hist_dist_CRD_gene.pdf"))
+      hist(mapdata$distance, breaks = 100, main=name_condition, xlab='distance in bp')
+      dev.off()
+  }
+}
 
 for(data_type in data_types){
   for(cell_type in cell_types){
@@ -88,6 +108,10 @@ for(data_type in data_types){
       allCRDs = fread(file_CRD,header=F)
       mapdata = read.table(file_mapdata, hea=F, stringsAsFactors=F)
       corr_genes=fread(paste0(path,rna_file[[cell_type]]))
+      
+
+      
+      ################ problem here with corrgenes
       corr_genes=get_corr_genes_formated(corr_genes,genelist)
       
       colnames(mapdata) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",

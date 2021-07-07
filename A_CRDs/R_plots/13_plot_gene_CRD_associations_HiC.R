@@ -113,20 +113,28 @@ compute_ratio_hic_array_aCRD_gene <-function(CRDmindist,CRDmaxdist,cutoff=5){
 #############################################################################################
 
 
+# getting genelist
+
 path_ref='/Users/dianaavalos/Programming/reference_files/'
 protein_coding_genes = scan(paste0(path_ref, "gencode.v15.annotation.protein_coding.gene_id.txt"),what="")
 long_nc_RNA_genes = scan(paste0(path_ref, "gencode.v15.annotation.long_noncoding_RNAs.gene_id.txt"),what="")
-PCHiC = fread('/Users/dianaavalos/Programming/THREE_CELL_TYPES__CLOMICS__EGAD00001002670_CLOMICS_v3.0__TRANS/PCHiC_peak_matrix_cutoff5.tsv')
 genelist = c(protein_coding_genes,long_nc_RNA_genes)
 
-path_CRD='/Users/dianaavalos/Programming/A_CRD_plots/quantify_ALL'
+
+PCHiC = fread('/Users/dianaavalos/Programming/THREE_CELL_TYPES__CLOMICS__EGAD00001002670_CLOMICS_v3.0__TRANS/PCHiC_peak_matrix_cutoff5.tsv')
+
+
+# paths 
+
+path='/Users/dianaavalos/Programming/Hi-C_correlated_peaks/'
+path_out = '/Users/dianaavalos/Programming/A_CRD_plots/figs_geneCRD/'
+path_CRD_genes='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged_TH/'
+
+
+path_CRD='/Users/dianaavalos/Programming/A_CRD_plots/quantify_ALL/'
 rna_file <- c('/EGAD00001002675_RNA.ALL.txt.gz', '/EGAD00001002674_RNA.ALL.txt.gz', '/EGAD00001002671_RNA.ALL.txt.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
-path='/Users/dianaavalos/Programming/Hi-C_correlated_peaks/'
-path_out = '/Users/dianaavalos/Programming/A_CRD_plots/figs_7_Rfile'
-
-path_CRD_genes='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged'
 
 ### old
 # cell_type_o = '72'
@@ -153,40 +161,43 @@ for(data_type in data_types){
     for(condition in conditions){
       
       # names of files
-      file_CRD=paste0(path_CRD,'/', data_type,'_',cell_type ,'.ALLchr.',condition,'.txt.gz')
-      cat(file_CRD)
-      file_aCRD_gene=paste0(path_CRD_genes,'/',data_type,'_',cell_type ,'_',condition,'_mapping_CRD_gene_nominal_permuts.txt.gz')
-      file_aCRD_gene_permutations=paste0(path_CRD_genes,'/',data_type,'_',cell_type ,'_',condition,'_mapping_CRD_gene_ALL.txt.gz')
       name_condition=paste0(data_type,'_',cell_type ,'_',condition)
+      file_CRD=paste0(path_CRD, data_type,'_',cell_type ,'.ALLchr.',condition,'.txt.gz')
+      file_mapdata=paste0(path_CRD_genes,data_type,'_',cell_type ,'_',condition,'_conditional.txt.gz')
+      print(name_condition)
       
       # download files
       allCRDs = fread(file_CRD,header=F)
-      array_aCRD_gene = read.table(file_aCRD_gene,stringsAsFactors=F)
-      aCRD_gene_perm = read.table(file_aCRD_gene_permutations, hea=F, stringsAsFactors=F)
+      array_aCRD_gene = read.table(file_mapdata, hea=F, stringsAsFactors=F)
       corr_genes=fread(paste0(path,rna_file[[cell_type]]))
+      corr_genes=get_corr_genes_formated(corr_genes,genelist)
+      
+      colnames(array_aCRD_gene) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
+                                    "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","rank",
+                                    "fwd_pval","fwd_r_squared","fwd_slope","fwd_best_hit","fwd_sig","bwd_pval","bwd_r_squared","bwd_slope","bwd_best_hit","bwd_sig")
+      
       
 
 ########
 
-      colnames(array_aCRD_gene) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
-       "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","nominal_pval","slope","top_variant")
-      
+      # colnames(array_aCRD_gene) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
+      #  "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","bwd_pval","slope","top_variant")
+      # 
       #Filter protein coding and long nc RNA genes
       array_aCRD_gene = array_aCRD_gene[array_aCRD_gene$phenotype_ID %in% genelist,]
       array_aCRD_gene = array_aCRD_gene[order(array_aCRD_gene[,2],array_aCRD_gene[,3]),]
       nb_CRD_not_associated = nrow(allCRDs) - length(unique(array_aCRD_gene$CRD_ID))
       
-      colnames(aCRD_gene_perm) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
-      "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","degree_freedom",
-      "Dummy","1st_param_beta","2nd_param_beta","nominal_pval","slope","empirical_pval","beta_pval")
-      aCRD_gene_perm = aCRD_gene_perm[aCRD_gene_perm$phenotype_ID %in% genelist,]
-      
+      # colnames(aCRD_gene_perm) = c("phenotype_ID","phenotype_ID_chr","phenotype_ID_start","phenotype_ID_end","phenotype_ID_strand",
+      # "nb_variants","distance","CRD_ID","CRD_ID_chr","CRD_ID_start","CRD_ID_end","degree_freedom",
+      # "Dummy","1st_param_beta","2nd_param_beta","bwd_pval","slope","empirical_pval","beta_pval")
+      # aCRD_gene_perm = aCRD_gene_perm[aCRD_gene_perm$phenotype_ID %in% genelist,]
+      # 
       # test
       # array_CRD_genes=aCRD_gene_perm
       # validated=compute_hic_validated(PCHiC, aCRD_gene_perm)
       
       ##### MAIN
-      corr_genes=get_corr_genes_formated(corr_genes,genelist)
       nb_genes_not_associated = length(unique(corr_genes$gene1)) - length(unique(array_aCRD_gene$phenotype_ID))
       validated=compute_hic_validated(PCHiC, array_aCRD_gene)
       
@@ -202,9 +213,9 @@ for(data_type in data_types){
       ############# PLOTS #################
       pre_fig_naming=paste0(path_out,'/',name_condition,'_Distance_analysis.pdf')
       
-      pdf(paste0(path_out,'/',name_condition,"_3.1_Histogram_pvalue_5FRD.pdf"))
-      hist(aCRD_gene_perm$beta_pval,main=paste0("Histogram of adjusted p-values%\n",nrow(array_aCRD_gene)," significant associations at 5% FDR"),xlab="P-values",cex.lab=1.3,cex.axis=1.3)
-      dev.off()
+      # pdf(paste0(path_out,'/',name_condition,"_3.1_Histogram_pvalue_5FRD.pdf"))
+      # hist(aCRD_gene_perm$beta_pval,main=paste0("Histogram of adjusted p-values%\n",nrow(array_aCRD_gene)," significant associations at 5% FDR"),xlab="P-values",cex.lab=1.3,cex.axis=1.3)
+      # dev.off()
       
       
       pdf(paste0(path_out,'/',name_condition,"_3.2_Histogram_gene_CRD_distance.pdf")) # Relative positive of genes within CRDs histogram
@@ -221,11 +232,11 @@ for(data_type in data_types){
       dev.off()
       
       pdf(paste0(path_out,'/',name_condition,"_Boxplot_pvalue_by_distance.pdf"))
-      within_CRD = -log10(array_aCRD_gene$nominal_pval[which(array_aCRD_gene$distance==0)])
-      less_1kb = -log10(array_aCRD_gene$nominal_pval[which(array_aCRD_gene$distance>0 & array_aCRD_gene$distance<1e03)])
-      less_10kb = -log10(array_aCRD_gene$nominal_pval[which(array_aCRD_gene$distance>1e03 & array_aCRD_gene$distance<1e04)])
-      less_100kb = -log10(array_aCRD_gene$nominal_pval[which(array_aCRD_gene$distance>1e04 & array_aCRD_gene$distance<1e05)])
-      less_1Mb = -log10(array_aCRD_gene$nominal_pval[which(array_aCRD_gene$distance>1e05 & array_aCRD_gene$distance<1e06)])
+      within_CRD = -log10(array_aCRD_gene$bwd_pval[which(array_aCRD_gene$distance==0)])
+      less_1kb = -log10(array_aCRD_gene$bwd_pval[which(array_aCRD_gene$distance>0 & array_aCRD_gene$distance<1e03)])
+      less_10kb = -log10(array_aCRD_gene$bwd_pval[which(array_aCRD_gene$distance>1e03 & array_aCRD_gene$distance<1e04)])
+      less_100kb = -log10(array_aCRD_gene$bwd_pval[which(array_aCRD_gene$distance>1e04 & array_aCRD_gene$distance<1e05)])
+      less_1Mb = -log10(array_aCRD_gene$bwd_pval[which(array_aCRD_gene$distance>1e05 & array_aCRD_gene$distance<1e06)])
       boxplot(within_CRD,less_1kb,less_10kb,less_100kb,less_1Mb,names=c("within_CRD","<1kb","<10kb","<100kb","<1Mb"),ylab="-log10(p-value)",cex.lab=1.3,cex.axis=1.3)
       dev.off()
       

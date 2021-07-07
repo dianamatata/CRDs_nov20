@@ -1,5 +1,5 @@
 #!/bin/bash
-permuts=200
+permuts=1000
 K=100
 
 DATADIR=/home/users/a/avalosma/scratch/4_CRD_residualized

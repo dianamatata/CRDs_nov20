@@ -20,12 +20,11 @@ library(corrplot)
 
 # if 50% of the peak overlap, it is a shared CRD
 # save the CRDs that are shared
-
 # query=peakset_neut
 # reference=peakset_mono
 # name=paste0(out_directory,paste0(name,'_neut_vs_mono'))
 compare_CRD <- function(query,reference,name,threshold=0.5){
-  filename=paste0(name,"_sharedCRDs1.txt")
+  filename=paste0(name,"_sharedCRDs1_extended.txt")
   file.create(filename)
 
   CRD_IDs = unique(query$V2)
@@ -40,10 +39,11 @@ compare_CRD <- function(query,reference,name,threshold=0.5){
       overlapping_peaks_in_same_CRD = 0
     }
     if(overlapping_peaks_in_same_CRD/length(current_peaks)>threshold){
+      degree_of_sharing=unname(overlapping_peaks_in_same_CRD)/length(current_peaks)[1]
       n_replicated = n_replicated + 1
       associated_CRDs=unique(reference$V2[reference$V1 %in% current_peaks])
-      for (associated in associated_CRDs){
-        line=paste(current_CRD ,associated,sep=" ")
+      for (associated_CRD in associated_CRDs){
+        line=paste(current_CRD ,associated_CRD,round(degree_of_sharing,3),unname(overlapping_peaks_in_same_CRD),length(current_peaks),sep=" ")
         #cat(current_CRD, associated,sep="\t")
         write(line,file=filename,append=TRUE)
       }
@@ -70,6 +70,7 @@ compute_correlation_matrix_CRD_sharing <- function(peakset_neut,peakset_mono,pea
   
   overlap_array_input=c(neut_vs_mono$fraction, neut_vs_tcell$fraction, mono_vs_neut$fraction, mono_vs_tcell$fraction , tcell_vs_mono$fraction, tcell_vs_neut$fraction)
 }
+
 
 
 #############################################################################################
@@ -127,6 +128,48 @@ for(data_type in c('hist','methyl')){
   # plot_correlation_matrix_CRD_sharing(overlap_array_input, name, plot_directory)
   
 }
+
+#############################################################################################
+#
+# quantify the degree of sharing
+#
+#############################################################################################
+
+out_directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_sharing/'
+library(Hmisc) # for describe
+
+file_list=list.files(path=out_directory,pattern=c('extended'))
+
+#plot the percentage of sharing for the shared CRDs
+for (f in file_list){
+  df = as.data.frame(fread(paste0(out_directory,f),header=F))
+
+  pdf(paste0(out_directory,substr(f, 1, nchar(f)-25),"_percent_sharing.pdf"))
+  hist(df$V3*100, main=(substr(f, 1, nchar(f)-25)), ylab='counts',xlab='percent sharing', breaks=10)
+  dev.off()
+}
+
+# plot and write the stats on thenbr of peaks shared
+out_file='stats_peaks_shared_CRDs'
+for (f in file_list){
+  df = as.data.frame(fread(paste0(out_directory,f),header=F))
+  pdf(paste0(out_directory,substr(f, 1, nchar(f)-25),"_hist_peak_nbr.pdf"))
+  hist(df$V5,  breaks=500, xlim = c(0, ceiling(max(df$V5)/10)*10) , main=(substr(f, 1, nchar(f)-25)),ylab='counts',xlab=paste0('nbr of peaks, mean= ', round(mean(df$V5),2), ' median ', median(df$V5), ' max ', max(df$V5)  ) ) 
+  dev.off()
+    # describe(df$V5)
+  #hist(df$V5, xlim = c(0,30), breaks=500)
+}
+
+filename=paste0(out_directory,"sharedCRDfile__total_CRDs__unique_CRDs.txt")
+file.create(filename)
+for (f in file_list){
+  df = as.data.frame(fread(paste0(out_directory,f),header=F))
+  line=paste0(substr(f, 1, nchar(f)-25), ' ',length(df$V1), ' ',length(unique(df$V1)),'  ')
+  print(line)
+  write(line,file=filename,append=TRUE)
+}
+
+
 
 #############################################################################################
 #

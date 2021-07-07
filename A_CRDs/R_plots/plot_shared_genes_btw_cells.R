@@ -14,11 +14,14 @@ library(reshape2)
 library(ggplot2)
 library(RColorBrewer)
 library(ggmosaic)
+library(data.table)
+library(dplyr)
+
 Paper=c("#00AFBB", "#E7B800", "#FC4E07","#972D15")
 color_palette= Paper
 
 # basically grep gene column then comupte interest
-directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/merged_TH/'
+directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/significants/'
 out_directory='/Users/dianaavalos/Programming/A_CRD_plots/CRD_genes_5/plots/'
 
 
@@ -35,12 +38,15 @@ condition='mean'
 
 for(data_type in data_types){
 
-      name=paste0(data_type,'_',condition)
+      name=paste0(data_type,'_',condition, '_signif')
       cat(name)
 
-      NEU=fread(paste0(directory,data_type,'_','neut','_',condition,'_conditional.txt.gz'))$V1
-      MON=fread(paste0(directory,data_type,'_','mono','_',condition,'_conditional.txt.gz'))$V1
-      TCL=fread(paste0(directory,data_type,'_','tcell','_',condition,'_conditional.txt.gz'))$V1
+      NEU=fread(paste0(directory,'FDR_0.05_',data_type,'_','neut','_',condition,'_mapping_CRD_gene_ALL.significant.txt'))$V1
+      MON=fread(paste0(directory,'FDR_0.05_',data_type,'_','mono','_',condition,'_mapping_CRD_gene_ALL.significant.txt'))$V1
+      TCL=fread(paste0(directory,'FDR_0.05_',data_type,'_','mono','_',condition,'_mapping_CRD_gene_ALL.significant.txt'))$V1
+      
+      #TCL=fread(paste0(directory,data_type,'_','tcell','_',condition,'_mapping_CRD_gene_ALL.txt.gz'))$V1
+      # TCL=fread(paste0(directory,data_type,'_','tcell','_',condition,'_conditional.txt.gz'))$V1
 
       N_M = length(intersect(NEU,MON))
       N_T = length(intersect(NEU,TCL))
@@ -107,6 +113,7 @@ for(data_type in data_types){
       scale_fill_manual(values = color_palette)+
       theme_bw() + theme(panel.border = element_blank(), panel.grid.major = element_blank(),panel.grid.minor = element_blank(), axis.line = element_line(colour = "black")) + 
       theme(text = element_text(size=20),axis.title = element_text(size = 20),axis.text = element_text(size = 20))
+    
     p1d<- ggplot_build(p1)$data %>% as.data.frame() %>% filter(.wt > 0)
     head(p1d)
     p1d$percentage=c(topoplot_normalized$NEU,topoplot_normalized$MON,topoplot_normalized$TCL)

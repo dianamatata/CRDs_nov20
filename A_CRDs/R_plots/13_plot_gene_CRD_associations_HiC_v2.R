@@ -166,6 +166,12 @@ path_CRD='/Users/dianaavalos/Programming/A_CRD_plots/quantify_ALL/'
 rna_file <- c('/EGAD00001002675_RNA.ALL.txt.gz', '/EGAD00001002674_RNA.ALL.txt.gz', '/EGAD00001002671_RNA.ALL.txt.gz')
 names(rna_file) <- c("neut", "mono", "tcell")
 
+# changes
+path='/Users/dianaavalos/Programming/A_CRD_plots/RNA'
+rna_file <- c('/EGAD00001002675_RNA.PC10.bed.gz', '/EGAD00001002674_RNA.PC10.bedt.gz', '/EGAD00001002671_RNA.PC10.bed.gz')
+
+
+
 PCHiC = fread('/Users/dianaavalos/Programming/THREE_CELL_TYPES__CLOMICS__EGAD00001002670_CLOMICS_v3.0__TRANS/PCHiC_peak_matrix_cutoff5.tsv')
 
 data_type='hist'
